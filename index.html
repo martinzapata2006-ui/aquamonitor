@@ -8,253 +8,249 @@
   <meta name="apple-mobile-web-app-title" content="AquaMonitor">
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <title>AquaMonitor</title>
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html,body{height:100%;overflow:hidden;background:#f4f6fa}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a2a3a;height:100dvh}
-    .app{width:100%;height:100dvh;background:#f4f6fa;display:flex;flex-direction:column;overflow:hidden;position:relative}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#f0f4f8}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a2a3a;height:100dvh}
+.app{width:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:#f0f4f8}
+.sbar{background:#fff;padding:env(safe-area-inset-top,10px) 16px 6px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8a9ab0;flex-shrink:0;border-bottom:1px solid #e4eaf4}
+.screen{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
+.screen.active{display:flex}
 
-    /* STATUS BAR */
-    .sbar{background:#ffffff;padding:env(safe-area-inset-top,10px) 16px 6px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#8a9ab0;flex-shrink:0;border-bottom:0.5px solid #e8edf5}
+/* FORM */
+.sc{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 24px;min-height:0}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-size:11px;color:#5a7a9a;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-weight:600}
+.fld input,.fld select{width:100%;background:#fff;border:1.5px solid #dce6f0;border-radius:12px;padding:13px 14px;font-size:15px;color:#1a2a3a;outline:none;-webkit-appearance:none;appearance:none;transition:border-color .15s}
+.fld input:focus,.fld select:focus{border-color:#2a7acc}
+.fld input::placeholder{color:#b0c0d0}
+.ew{position:relative}
+.ew input{padding-right:46px}
+.eb{position:absolute;right:13px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:18px;color:#8a9ab0;padding:4px}
+.btn-p{width:100%;background:#2a7acc;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;margin-top:8px;letter-spacing:.2px}
+.btn-p:active{opacity:.88}
+.btn-p:disabled{opacity:.45}
+.lnk{display:block;text-align:center;font-size:13px;color:#2a7acc;margin-top:16px;cursor:pointer;padding:4px}
+.err{background:#fff0f0;border:1.5px solid #f0b0b0;border-radius:10px;padding:10px 14px;font-size:13px;color:#cc3030;margin-bottom:13px;display:none}
+.err.show{display:block}
+.okmsg{background:#f0faf4;border:1.5px solid #90d0a0;border-radius:10px;padding:10px 14px;font-size:13px;color:#1a8040;margin-bottom:13px;display:none}
+.okmsg.show{display:block}
+.card{background:#fff;border:1px solid #e4eaf4;border-radius:16px;padding:20px;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.tabs{display:flex;gap:6px;margin-bottom:18px}
+.tab{flex:1;padding:10px;border:1.5px solid #dce6f0;border-radius:10px;font-size:14px;color:#5a7a9a;background:#f0f4f8;cursor:pointer;text-align:center;font-weight:500}
+.tab.on{background:#2a7acc;border-color:#2a7acc;color:#fff;font-weight:700}
+.secbadge{display:flex;align-items:center;gap:8px;background:#eef5fc;border:1px solid #c0d8f0;border-radius:10px;padding:9px 12px;margin-bottom:16px}
+.secbadge span{font-size:11px;color:#3a6a9a;font-weight:500}
+.strbar{height:4px;border-radius:2px;background:#e4eaf4;margin-top:6px;overflow:hidden}
+.strfill{height:100%;width:0;border-radius:2px;transition:width .3s,background .3s}
 
-    /* SCREENS */
-    .screen{display:none;flex:1;flex-direction:column;overflow:hidden;min-height:0}
-    .screen.active{display:flex}
-    .sc{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 15px 20px;min-height:0}
+/* LOGIN HEADER */
+.lhd{text-align:center;padding:30px 0 24px}
+.lring{width:76px;height:76px;border-radius:50%;background:#eef5fc;border:2px solid #b0cce8;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:36px}
+.lhd h1{font-size:26px;font-weight:800;color:#1a2a3a;margin-bottom:4px}
+.lhd p{font-size:13px;color:#6a8aa0}
 
-    /* FORMS */
-    .fld{margin-bottom:13px}
-    .fld label{display:block;font-size:11px;color:#6a85a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;font-weight:600}
-    .fld input,.fld select{width:100%;background:#ffffff;border:1px solid #dde4ef;border-radius:10px;padding:11px 13px;font-size:15px;color:#1a2a3a;outline:none;-webkit-appearance:none;appearance:none}
-    .fld input:focus,.fld select:focus{border-color:#3a7acc;box-shadow:0 0 0 3px rgba(58,122,204,0.1)}
-    .fld input::placeholder{color:#b0bdd0}
-    .ew{position:relative}.ew input{padding-right:42px}
-    .eb{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:17px;padding:3px;color:#8a9ab0}
-    .btn-p{width:100%;background:#2a6acc;border:none;border-radius:11px;padding:14px;font-size:15px;font-weight:600;color:#ffffff;cursor:pointer;margin-top:6px;box-shadow:0 2px 8px rgba(42,106,204,0.25)}
-    .btn-p:active{opacity:.88;transform:scale(.98)}.btn-p:disabled{opacity:.5}
-    .lnk{display:block;text-align:center;font-size:13px;color:#2a6acc;margin-top:14px;cursor:pointer;padding:4px}
-    .err{background:#fff0f0;border:1px solid #f5c0c0;border-radius:9px;padding:9px 13px;font-size:13px;color:#cc3030;margin-bottom:12px;display:none}
-    .err.show{display:block}
-    .ok{background:#f0faf3;border:1px solid #b0dfc0;border-radius:9px;padding:9px 13px;font-size:13px;color:#1a8a40;margin-bottom:12px;display:none}
-    .ok.show{display:block}
-    .card{background:#ffffff;border:1px solid #e0e8f5;border-radius:15px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
-    .tab-row{display:flex;gap:6px;margin-bottom:16px}
-    .tab{flex:1;padding:9px;border:1px solid #dde4ef;border-radius:9px;font-size:13px;color:#6a85a0;background:#f4f6fa;cursor:pointer;text-align:center;font-weight:500}
-    .tab.active{background:#2a6acc;border-color:#2a6acc;color:#ffffff;font-weight:600}
-    .sbadge{display:flex;align-items:center;gap:8px;background:#eef3fc;border:1px solid #ccd8f0;border-radius:8px;padding:8px 11px;margin-bottom:14px}
-    .sbadge span{font-size:11px;color:#4a6aaa;font-weight:500}
-    .sbar2{height:3px;border-radius:2px;background:#e0e8f0;margin-top:5px;overflow:hidden}
-    .sbar2-f{height:100%;width:0%;border-radius:2px;transition:width .3s,background .3s}
+/* VERIFY */
+.vctr{text-align:center;padding:26px 0 20px}
+.mico{width:72px;height:72px;border-radius:50%;background:#eef5fc;border:2px solid #b0cce8;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:32px}
+.vctr h2{font-size:22px;font-weight:700;color:#1a2a3a;margin-bottom:8px}
+.vctr p{font-size:13px;color:#6a8aa0;line-height:1.6}
+.ehl{color:#2a7acc;font-weight:700}
+.otprow{display:flex;gap:8px;justify-content:center;margin:18px 0}
+.otprow input{width:46px;height:54px;text-align:center;background:#fff;border:1.5px solid #dce6f0;border-radius:10px;font-size:22px;font-weight:700;color:#1a2a3a;outline:none;-webkit-appearance:none}
+.otprow input:focus{border-color:#2a7acc}
+.rrow{text-align:center;font-size:13px;color:#8a9ab0;margin-top:12px}
+.rrow span{color:#2a7acc;cursor:pointer;font-weight:600}
+.tinfo{background:#eef5fc;border:1px solid #b0cce8;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:12px;color:#3a6a9a;display:flex;gap:8px;line-height:1.6}
 
-    /* LOGIN HEADER */
-    .lhead{text-align:center;padding:28px 0 22px}
-    .lring{width:74px;height:74px;border-radius:50%;background:#eef3fc;border:2px solid #ccd8f0;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:34px}
-    .lhead h1{font-size:24px;font-weight:700;color:#1a2a3a;margin-bottom:3px}
-    .lhead p{font-size:12px;color:#6a85a0}
+/* DASH HEADER */
+.dh{background:#fff;border-bottom:1px solid #e4eaf4;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,0.05)}
+.dh h2{font-size:16px;font-weight:800;color:#1a2a3a;margin-bottom:2px}
+.cobdg{background:#eef5fc;border:1px solid #b0cce8;border-radius:6px;padding:2px 8px;font-size:11px;color:#2a7acc;font-weight:700}
+.av{width:34px;height:34px;border-radius:50%;background:#eef5fc;border:2px solid #b0cce8;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.sh{font-size:10px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;margin-top:4px;display:flex;align-items:center;gap:8px;font-weight:700}
+.sh::after{content:'';flex:1;height:1px;background:#e4eaf4}
 
-    /* VERIFY */
-    .vcenter{text-align:center;padding:24px 0 18px}
-    .micon{width:68px;height:68px;border-radius:50%;background:#eef3fc;border:2px solid #ccd8f0;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:30px}
-    .vcenter h2{font-size:20px;font-weight:700;color:#1a2a3a;margin-bottom:6px}
-    .vcenter p{font-size:13px;color:#6a85a0;line-height:1.6}
-    .ehl{color:#2a6acc;font-weight:600}
-    .otp-row{display:flex;gap:7px;justify-content:center;margin:18px 0}
-    .otp-row input{width:44px;height:52px;text-align:center;background:#ffffff;border:1.5px solid #dde4ef;border-radius:9px;font-size:21px;font-weight:700;color:#1a2a3a;outline:none}
-    .otp-row input:focus{border-color:#2a6acc;box-shadow:0 0 0 3px rgba(42,106,204,0.1)}
-    .rrow{text-align:center;font-size:12px;color:#8a9ab0;margin-top:10px}
-    .rrow span{color:#2a6acc;cursor:pointer;font-weight:500}
-    .tinfo{background:#eef3fc;border:1px solid #ccd8f0;border-radius:9px;padding:11px 13px;margin-top:12px;font-size:12px;color:#4a6aaa;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+/* PIPE */
+.pc{background:#fff;border:1px solid #e4eaf4;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.phl{display:flex;align-items:center;gap:10px}
+.phl p{font-size:14px;font-weight:700;color:#1a2a3a;margin:0}
+.phl small{font-size:10px;color:#8a9ab0}
+.pvis{height:38px;background:#f0f4f8;border-radius:8px;overflow:hidden;margin-bottom:8px;border:1px solid #e4eaf4}
+.pf{height:100%;border-radius:8px;transition:width 1.2s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:10px}
+.pf span{font-size:12px;font-weight:700}
+.pf.ok{background:#d0f0e0}.pf.ok span{color:#1a7a40}
+.pf.warn{background:#fde8b0}.pf.warn span{color:#9a6000}
+.pf.crit{background:#fdd0d0}.pf.crit span{color:#cc2020}
+.psc{display:flex;justify-content:space-between;font-size:10px;color:#8a9ab0;margin-bottom:12px}
+.pmg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pm{background:#f6f9fc;border:1px solid #e4eaf4;border-radius:10px;padding:10px 12px}
+.pml{font-size:10px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;font-weight:600}
+.pmv{font-size:20px;font-weight:800;color:#1a2a3a}
+.pmv span{font-size:11px;color:#8a9ab0;font-weight:400}
+.pms{font-size:10px;margin-top:2px;font-weight:600}
+.pms.ok{color:#1a8040}.pms.warn{color:#9a6000}.pms.crit{color:#cc2020}
 
-    /* DASH HEADER */
-    .dh{background:#ffffff;border-bottom:1px solid #e0e8f5;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-    .dh h2{font-size:15px;font-weight:700;color:#1a2a3a;margin-bottom:2px}
-    .cbadge{background:#eef3fc;border:1px solid #ccd8f0;border-radius:6px;padding:2px 8px;font-size:10px;color:#2a6acc;display:inline-block;font-weight:600}
-    .av{width:32px;height:32px;border-radius:50%;background:#eef3fc;border:1.5px solid #ccd8f0;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer}
-    .sh{font-size:10px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.6px;margin-bottom:9px;display:flex;align-items:center;gap:8px;font-weight:600}
-    .sh::after{content:'';flex:1;height:1px;background:#e8edf5}
+/* BADGES */
+.bdg{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700}
+.bdg.ok{background:#d0f0e0;color:#1a7a40}
+.bdg.warn{background:#fde8b0;color:#9a6000}
+.bdg.crit{background:#fdd0d0;color:#cc2020}
 
-    /* PIPE CARD */
-    .pc{background:#ffffff;border:1px solid #e0e8f5;border-radius:13px;padding:13px;margin-bottom:13px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-    .ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
-    .phl{display:flex;align-items:center;gap:9px}
-    .phl p{font-size:13px;font-weight:600;color:#1a2a3a;margin:0}
-    .phl small{font-size:10px;color:#8a9ab0}
-    .pvis{height:36px;background:#f0f4fa;border-radius:7px;overflow:hidden;margin-bottom:7px;border:1px solid #e0e8f5}
-    .pf{height:100%;border-radius:7px;transition:width 1.2s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:9px}
-    .pf span{font-size:11px;font-weight:700}
-    .pf.ok{background:#d4f0e0}.pf.ok span{color:#1a7a40}
-    .pf.warn{background:#fde8c0}.pf.warn span{color:#a06010}
-    .pf.crit{background:#fdd0d0}.pf.crit span{color:#cc2020}
-    .psc{display:flex;justify-content:space-between;font-size:10px;color:#8a9ab0;margin-bottom:11px}
-    .pmg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-    .pm{background:#f4f6fa;border:1px solid #e8edf5;border-radius:9px;padding:9px 11px}
-    .pml{font-size:10px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;font-weight:600}
-    .pmv{font-size:19px;font-weight:700;color:#1a2a3a}
-    .pmv span{font-size:10px;color:#8a9ab0;font-weight:400}
-    .pms{font-size:10px;margin-top:2px;font-weight:500}
-    .pms.ok{color:#1a8a40}.pms.warn{color:#a06010}.pms.crit{color:#cc2020}
+/* ALERT BANNER */
+.ab{border-radius:12px;padding:14px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start}
+.ab.warn{background:#fffbec;border:1.5px solid #f0d070}
+.ab.crit{background:#fff2f2;border:1.5px solid #f0a0a0}
+.ab.ok{background:#f2fbf5;border:1.5px solid #90d0a0}
+.abic{font-size:22px;flex-shrink:0;margin-top:1px}
+.abtit{font-size:13px;font-weight:700;margin-bottom:3px}
+.ab.warn .abtit{color:#8a5a00}.ab.crit .abtit{color:#cc2020}.ab.ok .abtit{color:#1a7a40}
+.abdesc{font-size:11px;color:#6a8aa0}
+.brow{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.nbtn{background:#fff;border:1.5px solid #b0cce8;border-radius:9px;padding:8px 12px;font-size:12px;color:#2a7acc;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.nbtn:active{opacity:.8}
+.dbtn{background:#f2fbf5;border:1.5px solid #90d0a0;border-radius:9px;padding:8px 12px;font-size:12px;color:#1a7a40;cursor:pointer;font-weight:600;display:none;align-items:center;gap:5px}
+.dbtn.vis{display:inline-flex}
 
-    /* ALERT BANNER */
-    .ab{border-radius:11px;padding:13px;margin-bottom:13px;display:flex;gap:9px;align-items:flex-start}
-    .ab.warn{background:#fff8e8;border:1px solid #f0d080}
-    .ab.crit{background:#fff0f0;border:1px solid #f0b0b0}
-    .ab.ok{background:#f0faf3;border:1px solid #a0d0b0}
-    .ab-ic{font-size:20px;flex-shrink:0;margin-top:2px}
-    .ab.warn .ab-t{color:#8a5a00}.ab.crit .ab-t{color:#cc2020}.ab.ok .ab-t{color:#1a7a40}
-    .ab-t{font-size:13px;font-weight:600;margin-bottom:2px}
-    .ab-d{font-size:11px;color:#6a85a0}
-    .brow{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
-    .nbtn{background:#ffffff;border:1px solid #ccd8f0;border-radius:8px;padding:7px 11px;font-size:12px;color:#2a6acc;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
-    .nbtn:active{opacity:.8}
-    .dbtn{background:#f0faf3;border:1px solid #a0d0b0;border-radius:8px;padding:7px 11px;font-size:12px;color:#1a7a40;cursor:pointer;display:none;align-items:center;gap:4px;font-weight:500}
-    .dbtn.vis{display:inline-flex}
+/* MAINTENANCE */
+.ml{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.mi{background:#fff;border:1px solid #e4eaf4;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,0.03)}
+.mii{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.mii.red{background:#fff2f2}.mii.amber{background:#fffbec}.mii.green{background:#f2fbf5}
+.mib{flex:1}
+.mib strong{font-size:12px;color:#1a2a3a;display:block;margin-bottom:2px;font-weight:700}
+.mib small{font-size:10px;color:#8a9ab0}
+.mdb{background:#f2fbf5;border:1.5px solid #90d0a0;border-radius:8px;padding:6px 10px;font-size:11px;color:#1a7a40;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:700}
+.mdb:disabled{opacity:.4;cursor:not-allowed;background:#f0f4f8;border-color:#e4eaf4;color:#8a9ab0}
 
-    /* MAINTENANCE */
-    .ml{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
-    .mi{background:#ffffff;border:1px solid #e0e8f5;border-radius:11px;padding:11px 13px;display:flex;align-items:center;gap:9px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-    .mii{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
-    .mii.red{background:#fff0f0}.mii.amber{background:#fff8e8}.mii.green{background:#f0faf3}
-    .mib{flex:1}
-    .mib strong{font-size:12px;color:#1a2a3a;display:block;margin-bottom:1px;font-weight:600}
-    .mib small{font-size:10px;color:#8a9ab0}
-    .mbadge{font-size:10px;padding:3px 9px;border-radius:9px;font-weight:600;white-space:nowrap}
-    .mbadge.red{background:#fff0f0;color:#cc2020;border:1px solid #f0b0b0}
-    .mbadge.amber{background:#fff8e8;color:#a06010;border:1px solid #f0d080}
-    .mbadge.green{background:#f0faf3;color:#1a7a40;border:1px solid #a0d0b0}
-    .mdb{background:#f0faf3;border:1px solid #a0d0b0;border-radius:7px;padding:5px 9px;font-size:11px;color:#1a7a40;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:500}
-    .mdb:disabled{opacity:.4;cursor:not-allowed;background:#f4f6fa;border-color:#e0e8f5;color:#8a9ab0}
+/* PILLS */
+.pills{display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:3px}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex-shrink:0;padding:8px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #dce6f0;background:#fff;color:#5a7a9a}
+.pill.on{background:#2a7acc;border-color:#2a7acc;color:#fff}
 
-    /* PILLS */
-    .pills{display:flex;gap:6px;margin-bottom:13px;overflow-x:auto;padding-bottom:3px}
-    .pills::-webkit-scrollbar{display:none}
-    .pill{flex-shrink:0;padding:7px 13px;border-radius:18px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #dde4ef;background:#ffffff;color:#6a85a0}
-    .pill.active{background:#2a6acc;border-color:#2a6acc;color:#ffffff}
+/* SEC LOCK */
+.sl{background:#eef5fc;border:1px solid #b0cce8;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sl p{font-size:11px;color:#2a7acc;margin:0;font-weight:600}
+.sl small{font-size:10px;color:#6a8aa0}
 
-    /* SEC LOCK */
-    .sl{background:#eef3fc;border:1px solid #ccd8f0;border-radius:9px;padding:9px 13px;margin-bottom:13px;display:flex;align-items:center;gap:9px}
-    .sl p{font-size:11px;color:#2a6acc;margin:0;font-weight:500}
-    .sl small{font-size:10px;color:#6a85a0}
+/* TOAST */
+.toast{position:absolute;top:72px;left:14px;right:14px;background:#fff;border:1px solid #b0cce8;border-radius:14px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start;z-index:999;transform:translateY(-130px);opacity:0;transition:transform .35s cubic-bezier(.17,.67,.35,1.2),opacity .3s;box-shadow:0 6px 24px rgba(0,0,0,0.12)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast p{font-size:13px;color:#1a2a3a;margin:0 0 2px;font-weight:700}
+.toast small{font-size:11px;color:#6a8aa0}
+.toast.ts{background:#f2fbf5;border-color:#90d0a0}.toast.ts p{color:#1a7a40}
+.toast.te{background:#fff2f2;border-color:#f0a0a0}.toast.te p{color:#cc2020}
 
-    /* TOAST */
-    .toast{position:absolute;top:68px;left:13px;right:13px;background:#ffffff;border:1px solid #ccd8f0;border-radius:13px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start;z-index:200;transform:translateY(-110px);opacity:0;transition:transform .35s cubic-bezier(.17,.67,.35,1.2),opacity .3s;box-shadow:0 4px 20px rgba(0,0,0,0.12)}
-    .toast.show{transform:translateY(0);opacity:1}
-    .toast p{font-size:13px;color:#1a2a3a;margin:0 0 2px;font-weight:600}
-    .toast small{font-size:11px;color:#6a85a0}
-    .toast.ts{background:#f0faf3;border-color:#a0d0b0}
-    .toast.ts p{color:#1a7a40}
-    .toast.te{background:#fff0f0;border-color:#f0b0b0}
-    .toast.te p{color:#cc2020}
+/* DOT */
+.dl{width:8px;height:8px;border-radius:50%;background:#20cc60;display:inline-block;animation:pls 2s infinite}
+@keyframes pls{0%,100%{opacity:1}50%{opacity:.3}}
 
-    /* DOT */
-    .dl{width:7px;height:7px;border-radius:50%;background:#22b55a;display:inline-block;animation:pls 2s infinite}
-    @keyframes pls{0%,100%{opacity:1}50%{opacity:.4}}
+/* BOTTOM NAV */
+.bnav{background:#fff;border-top:1px solid #e4eaf4;display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,8px);box-shadow:0 -2px 10px rgba(0,0,0,0.05)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:10px 0 6px;position:relative}
+.nic{font-size:22px}.nit{font-size:10px;font-weight:600}
+.nic,.nit{color:#b0bec8}
+.ni.on .nic,.ni.on .nit{color:#2a7acc}
+.nbdg{position:absolute;top:6px;right:12px;font-size:9px;background:#e02020;color:#fff;border-radius:8px;padding:1px 5px;min-width:16px;text-align:center;font-weight:700}
 
-    /* BOTTOM NAV */
-    .bnav{background:#ffffff;border-top:1px solid #e0e8f5;display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,6px);box-shadow:0 -1px 6px rgba(0,0,0,0.05)}
-    .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:9px 0 5px;position:relative}
-    .ni .nic{font-size:21px}.ni .nit{font-size:10px;font-weight:500}
-    .ni .nic,.ni .nit{color:#a0aab8}
-    .ni.active .nic,.ni.active .nit{color:#2a6acc}
-    .nbadge{position:absolute;top:5px;right:14px;font-size:9px;background:#e02020;color:#ffffff;border-radius:7px;padding:1px 5px;min-width:15px;text-align:center;font-weight:700}
+/* HISTORY */
+.hi{background:#fff;border:1px solid #e4eaf4;border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.hid{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.hid.red{background:#e02020}.hid.green{background:#1a8040}.hid.amber{background:#c07010}
+.hi p{font-size:12px;color:#1a2a3a;margin:0 0 2px;font-weight:600}
+.hi small{font-size:10px;color:#8a9ab0}
 
-    /* HISTORY */
-    .hi{background:#ffffff;border:1px solid #e0e8f5;border-radius:9px;padding:9px 13px;margin-bottom:7px;display:flex;align-items:flex-start;gap:9px;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
-    .hid{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
-    .hid.red{background:#e02020}.hid.green{background:#1a8a40}.hid.amber{background:#c07010}
-    .hi p{font-size:12px;color:#1a2a3a;margin:0 0 1px;font-weight:500}
-    .hi small{font-size:10px;color:#8a9ab0}
+/* CHARTS */
+.cc{background:#fff;border:1px solid #e4eaf4;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.cc h3{font-size:13px;font-weight:700;color:#1a2a3a;margin-bottom:3px}
+.cc small{font-size:10px;color:#8a9ab0;display:block;margin-bottom:12px}
+.cw{position:relative;height:160px}
+.sr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.sb{background:#fff;border:1px solid #e4eaf4;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.slbl{font-size:10px;color:#8a9ab0;text-transform:uppercase;margin-bottom:4px;font-weight:700}
+.sval{font-size:20px;font-weight:800;color:#1a2a3a}
+.sval span{font-size:10px;font-weight:400;color:#8a9ab0}
+.ssub{font-size:10px;margin-top:2px;font-weight:600}
 
-    /* CHARTS */
-    .cc{background:#ffffff;border:1px solid #e0e8f5;border-radius:13px;padding:13px;margin-bottom:13px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-    .cc h3{font-size:12px;font-weight:700;color:#1a2a3a;margin-bottom:3px}
-    .cc small{font-size:10px;color:#8a9ab0;display:block;margin-bottom:11px}
-    .cw{position:relative;height:155px}
-    .sr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:13px}
-    .sb{background:#ffffff;border:1px solid #e0e8f5;border-radius:11px;padding:11px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-    .sb .sl2{font-size:10px;color:#8a9ab0;text-transform:uppercase;margin-bottom:3px;font-weight:600}
-    .sb .sv{font-size:19px;font-weight:700;color:#1a2a3a}
-    .sb .sv span{font-size:10px;font-weight:400;color:#8a9ab0}
-    .sb .ss{font-size:10px;margin-top:2px;font-weight:500}
+/* ALERTS */
+.ait{background:#fff;border:1px solid #e4eaf4;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.ait.unr{border-color:#b0cce8;background:#fafcff}
+.aid{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.aid.red{background:#e02020}.aid.amber{background:#c07010}.aid.green{background:#1a8040}
+.aib{flex:1}
+.aib p{font-size:12px;color:#1a2a3a;margin:0 0 3px;font-weight:600}
+.aib small{font-size:10px;color:#8a9ab0}
+.aibdg{font-size:10px;padding:3px 9px;border-radius:8px;font-weight:700;flex-shrink:0;align-self:flex-start}
+.aibdg.red{background:#fff2f2;color:#cc2020}
+.aibdg.amber{background:#fffbec;color:#9a6000}
+.aibdg.green{background:#f2fbf5;color:#1a7a40}
+.xlsbtn{width:100%;background:#fff;border:2px solid #1a8040;border-radius:12px;padding:13px;font-size:14px;font-weight:700;color:#1a8040;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+.xlsbtn:active{background:#f2fbf5}
 
-    /* ALERTS TAB */
-    .ait{background:#ffffff;border:1px solid #e0e8f5;border-radius:11px;padding:11px 13px;margin-bottom:7px;display:flex;gap:9px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
-    .ait.unr{border-color:#ccd8f0;background:#fafcff}
-    .aid{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
-    .aid.red{background:#e02020}.aid.amber{background:#c07010}.aid.green{background:#1a8a40}
-    .aib p{font-size:12px;color:#1a2a3a;margin:0 0 2px;font-weight:500}
-    .aib small{font-size:10px;color:#8a9ab0}
-    .aibadge{font-size:10px;padding:3px 8px;border-radius:7px;font-weight:600;margin-left:auto;flex-shrink:0;align-self:flex-start}
-    .aibadge.red{background:#fff0f0;color:#cc2020;border:1px solid #f0b0b0}
-    .aibadge.amber{background:#fff8e8;color:#a06010;border:1px solid #f0d080}
-    .aibadge.green{background:#f0faf3;color:#1a7a40;border:1px solid #a0d0b0}
-
-    /* EXCEL BUTTON */
-    .xls-btn{width:100%;background:#ffffff;border:1.5px solid #1a7a40;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:#1a7a40;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-    .xls-btn:active{background:#f0faf3}
-
-    /* CONFIG */
-    .cfs{margin-bottom:18px}
-    .cfs h3{font-size:11px;color:#6a85a0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid #e8edf5;font-weight:700}
-    .cfr{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #f0f4fa}
-    .cfr:last-child{border-bottom:none}
-    .cfr-l p{font-size:13px;color:#1a2a3a;margin:0 0 2px;font-weight:500}
-    .cfr-l small{font-size:10px;color:#8a9ab0}
-    .tgl{width:42px;height:23px;background:#d0dae8;border-radius:11px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
-    .tgl.on{background:#2a6acc}
-    .tgl::after{content:'';position:absolute;width:17px;height:17px;background:#ffffff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
-    .tgl.on::after{left:22px}
-    .cfv{font-size:12px;color:#2a6acc;font-weight:600}
-    .cuc{background:#ffffff;border:1px solid #e0e8f5;border-radius:13px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
-    .cua{width:46px;height:46px;border-radius:50%;background:#eef3fc;border:2px solid #ccd8f0;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
-    .cuc p{font-size:14px;color:#1a2a3a;font-weight:700;margin:0 0 2px}
-    .cuc small{font-size:11px;color:#6a85a0}
-    .cdng{width:100%;background:#fff0f0;border:1px solid #f0b0b0;border-radius:9px;padding:12px;font-size:13px;color:#cc2020;cursor:pointer;margin-top:7px;font-weight:600}
-    .lor{display:flex;justify-content:flex-end;margin-bottom:9px}
-    .lob{background:#ffffff;border:1px solid #e0e8f5;border-radius:7px;padding:5px 11px;font-size:11px;color:#6a85a0;cursor:pointer;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+/* CONFIG */
+.cfs{margin-bottom:20px}
+.cfs h3{font-size:11px;color:#8a9ab0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e4eaf4;font-weight:700}
+.cfr{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f0f4f8}
+.cfr:last-child{border-bottom:none}
+.cfrl p{font-size:13px;color:#1a2a3a;margin:0 0 2px;font-weight:600}
+.cfrl small{font-size:10px;color:#8a9ab0}
+.tgl{width:44px;height:24px;background:#d0dae8;border-radius:12px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tgl.on{background:#2a7acc}
+.tgl::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.tgl.on::after{left:23px}
+.cfv{font-size:12px;color:#2a7acc;font-weight:700}
+.cuc{background:#fff;border:1px solid #e4eaf4;border-radius:14px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+.cua{width:50px;height:50px;border-radius:50%;background:#eef5fc;border:2px solid #b0cce8;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.cuc p{font-size:15px;color:#1a2a3a;font-weight:800;margin:0 0 2px}
+.cuc small{font-size:11px;color:#6a8aa0}
+.dnbtn{width:100%;background:#fff2f2;border:1.5px solid #f0a0a0;border-radius:12px;padding:14px;font-size:14px;color:#cc2020;cursor:pointer;margin-top:8px;font-weight:700}
+.lobtn{background:#fff;border:1px solid #e4eaf4;border-radius:8px;padding:6px 12px;font-size:11px;color:#8a9ab0;cursor:pointer;font-weight:600}
+.lor{display:flex;justify-content:flex-end;margin-bottom:10px}
   </style>
 </head>
 <body>
 <div class="app" id="APP">
-  <div class="sbar"><span id="clk">9:41</span><span style="font-size:13px">📶 🔋</span></div>
+  <div class="sbar"><span id="clk">9:41</span><span>📶 🔋</span></div>
 
+  <!-- TOAST -->
   <div class="toast" id="toast">
-    <span style="font-size:22px;flex-shrink:0" id="tico">🔔</span>
+    <span style="font-size:24px;flex-shrink:0" id="tico">🔔</span>
     <div><p id="tmsg">Alerta enviada</p><small id="tsub">El equipo fue notificado</small></div>
   </div>
 
-  <!-- ══ LOGIN ══ -->
+  <!-- LOGIN -->
   <div class="screen active" id="sLogin">
-    <div class="sc" style="padding:0 18px 20px">
-      <div class="lhead">
+    <div class="sc">
+      <div class="lhd">
         <div class="lring">〰️</div>
         <h1>AquaMonitor</h1>
         <p>Monitoreo de tuberías industriales</p>
       </div>
       <div class="card">
-        <div class="sbadge"><span>🔒</span><span>Conexión cifrada · Token JWT · 2FA activo</span></div>
-        <div class="tab-row">
-          <button class="tab active" id="tL" onclick="swTab('L')">Iniciar sesión</button>
-          <button class="tab" id="tR" onclick="swTab('R')">Crear cuenta</button>
+        <div class="secbadge"><span>🔒</span><span>Conexión cifrada · Verificación por correo</span></div>
+        <div class="tabs">
+          <button class="tab on" id="tA" onclick="swTab('A')">Iniciar sesión</button>
+          <button class="tab" id="tB" onclick="swTab('B')">Crear cuenta</button>
         </div>
-        <div id="fL">
-          <div class="err" id="eL"></div>
+        <!-- LOGIN -->
+        <div id="fA">
+          <div class="err" id="eA"></div>
           <div class="fld"><label>Correo electrónico</label><input type="email" id="lEm" placeholder="usuario@empresa.cl" autocomplete="email"></div>
           <div class="fld"><label>Contraseña</label>
-            <div class="ew"><input type="password" id="lPw" placeholder="••••••••" autocomplete="current-password"><button class="eb" onclick="tEye('lPw')">👁</button></div>
+            <div class="ew"><input type="password" id="lPw" placeholder="••••••••" autocomplete="current-password"><button class="eb" onclick="ojo('lPw')">👁</button></div>
           </div>
-          <button class="btn-p" id="btnL" onclick="doLogin()">Ingresar</button>
+          <button class="btn-p" id="btnL" onclick="login()">Ingresar</button>
           <span class="lnk">¿Olvidaste tu contraseña?</span>
         </div>
-        <div id="fR" style="display:none">
-          <div class="err" id="eR"></div>
+        <!-- REGISTER -->
+        <div id="fB" style="display:none">
+          <div class="err" id="eB"></div>
           <div class="fld"><label>Nombre completo</label><input type="text" id="rNm" placeholder="Juan Pérez" autocomplete="name"></div>
-          <div class="fld"><label>Empresa / Organización</label><input type="text" id="rCo" placeholder="Ej: Industrial Sur S.A."></div>
-          <div class="fld"><label>Rubro industrial</label>
+          <div class="fld"><label>Empresa</label><input type="text" id="rCo" placeholder="Ej: Industrial Sur S.A."></div>
+          <div class="fld"><label>Rubro</label>
             <select id="rSec">
               <option value="">Selecciona...</option>
               <option>Acuicultura / Salmonicultura</option>
@@ -267,409 +263,418 @@
           </div>
           <div class="fld"><label>Correo corporativo</label><input type="email" id="rEm" placeholder="nombre@empresa.cl" autocomplete="email"></div>
           <div class="fld"><label>Contraseña</label>
-            <div class="ew"><input type="password" id="rPw" placeholder="Mín. 8 caracteres" oninput="chkStr(this.value)" autocomplete="new-password"><button class="eb" onclick="tEye('rPw')">👁</button></div>
-            <div class="sbar2"><div class="sbar2-f" id="sBar"></div></div>
+            <div class="ew"><input type="password" id="rPw" placeholder="Mín. 8 caracteres" oninput="fuerza(this.value)" autocomplete="new-password"><button class="eb" onclick="ojo('rPw')">👁</button></div>
+            <div class="strbar"><div class="strfill" id="sfill"></div></div>
           </div>
           <div class="fld"><label>Confirmar contraseña</label><input type="password" id="rPw2" placeholder="Repite la contraseña" autocomplete="new-password"></div>
-          <button class="btn-p" id="btnR" onclick="doReg()">Crear cuenta y verificar correo</button>
+          <button class="btn-p" id="btnR" onclick="registrar()">Crear cuenta y verificar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ VERIFY ══ -->
+  <!-- VERIFY -->
   <div class="screen" id="sVer">
-    <div class="sc" style="padding:0 18px 20px">
-      <div class="vcenter">
-        <div class="micon">📬</div>
+    <div class="sc">
+      <div class="vctr">
+        <div class="mico">📬</div>
         <h2>Verifica tu correo</h2>
-        <p>Código de 6 dígitos enviado a<br><span class="ehl" id="vEm">correo@empresa.cl</span></p>
+        <p>Enviamos un código de 6 dígitos a<br><span class="ehl" id="vEm">correo@empresa.cl</span></p>
       </div>
       <div class="card">
         <div class="err" id="eOtp"></div>
-        <div class="ok" id="okOtp"></div>
-        <p style="font-size:12px;color:#6a85a0;margin-bottom:11px;text-align:center">Ingresa el código recibido</p>
-        <div class="otp-row">
-          <input type="number" maxlength="1" class="oi" data-i="0" inputmode="numeric">
-          <input type="number" maxlength="1" class="oi" data-i="1" inputmode="numeric">
-          <input type="number" maxlength="1" class="oi" data-i="2" inputmode="numeric">
-          <input type="number" maxlength="1" class="oi" data-i="3" inputmode="numeric">
-          <input type="number" maxlength="1" class="oi" data-i="4" inputmode="numeric">
-          <input type="number" maxlength="1" class="oi" data-i="5" inputmode="numeric">
+        <div class="okmsg" id="okOtp"></div>
+        <p style="font-size:13px;color:#6a8aa0;text-align:center;margin-bottom:12px">Ingresa el código recibido</p>
+        <div class="otprow">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
+          <input type="number" maxlength="1" class="oi" inputmode="numeric">
         </div>
-        <button class="btn-p" onclick="verOTP()">Verificar y activar cuenta</button>
-        <div class="rrow" style="margin-top:12px">¿No llegó? <span onclick="resend()">Reenviar código</span></div>
-        <div class="tinfo">🛡️ <span>El código expira en 10 minutos. Los datos de los sensores se habilitan solo tras verificar tu cuenta.</span></div>
+        <button class="btn-p" onclick="verificar()">Verificar y activar cuenta</button>
+        <div class="rrow" style="margin-top:14px">¿No llegó? <span onclick="reenviar()">Reenviar código</span></div>
+        <div class="tinfo">🛡️ <span>El código expira en 10 minutos. Tus sensores se activan tras verificar tu cuenta.</span></div>
       </div>
       <span class="lnk" onclick="goLogin()">← Volver al inicio</span>
     </div>
   </div>
 
-  <!-- ══ DASHBOARD ══ -->
+  <!-- DASHBOARD -->
   <div class="screen" id="sDash">
     <div class="dh">
-      <div><h2>AquaMonitor</h2><span class="cbadge" id="dCo">Mi empresa</span></div>
-      <div style="display:flex;align-items:center;gap:9px">
-        <span style="font-size:10px;color:#6a85a0;font-weight:500"><span class="dl"></span> En línea</span>
+      <div><h2>AquaMonitor</h2><span class="cobdg" id="dCo">Empresa</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:11px;color:#8a9ab0;font-weight:600"><span class="dl"></span> En línea</span>
         <div class="av">👤</div>
       </div>
     </div>
 
-    <!-- TAB WRAPPER -->
-    <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0">
+    <!-- TAB CONTAINER -->
+    <div id="tabWrap" style="flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0">
 
-    <!-- HOME -->
-    <div id="tHome" class="sc">
-      <div class="lor"><button class="lob" onclick="doLogout()">🚪 Salir</button></div>
-      <div class="sl"><span style="font-size:15px">🔐</span><div><p>Sesión autenticada · Token activo</p><small>Acceso exclusivo · Cifrado AES-256</small></div></div>
-      <div class="sh">Trolvas monitoreadas</div>
-      <div class="pills" id="pipePills">
-        <div class="pill active" data-pipe="T-01" onclick="selPipe(this)">Trolva 01</div>
-        <div class="pill" data-pipe="T-02" onclick="selPipe(this)">Trolva 02</div>
-        <div class="pill" data-pipe="T-03" onclick="selPipe(this)">Trolva 03</div>
-        <div class="pill" data-pipe="T-04" onclick="selPipe(this)">Trolva 04</div>
-      </div>
-      <div class="ab warn" id="abanner">
-        <span class="ab-ic" id="abic">⚠️</span>
-        <div style="flex:1">
-          <div class="ab-t" id="abtit">Flujo másico reducido — Trolva 01</div>
-          <div class="ab-d" id="abdesc">68% del caudal nominal · Posible obstrucción de lodo</div>
-          <div class="brow">
-            <button class="nbtn" id="btnN" onclick="sendAlert()">🔔 Notificar al equipo</button>
-            <button class="dbtn" id="btnD" onclick="markDone()">✅ Mantención lista</button>
+      <!-- HOME -->
+      <div id="tHome" class="sc">
+        <div class="lor"><button class="lobtn" onclick="logout()">🚪 Salir</button></div>
+        <div class="sl"><span style="font-size:16px">🔐</span><div><p>Sesión autenticada · AES-256</p><small>Acceso exclusivo a tus trolvas</small></div></div>
+        <div class="sh">Trolvas monitoreadas</div>
+        <div class="pills" id="ppills">
+          <div class="pill on" data-p="T1" onclick="selTrolva(this)">Trolva 01</div>
+          <div class="pill" data-p="T2" onclick="selTrolva(this)">Trolva 02</div>
+          <div class="pill" data-p="T3" onclick="selTrolva(this)">Trolva 03</div>
+          <div class="pill" data-p="T4" onclick="selTrolva(this)">Trolva 04</div>
+        </div>
+        <div class="ab warn" id="abanner">
+          <span class="abic" id="abic">⚠️</span>
+          <div style="flex:1">
+            <div class="abtit" id="abtit">Flujo másico reducido — Trolva 01</div>
+            <div class="abdesc" id="abdesc">68% del caudal nominal · Posible obstrucción</div>
+            <div class="brow">
+              <button class="nbtn" id="btnN" onclick="enviarAlerta()">🔔 Notificar al equipo</button>
+              <button class="dbtn" id="btnD" onclick="mantLista()">✅ Mantención lista</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="sh">Flujo másico en tiempo real</div>
-      <div class="pc">
-        <div class="ph">
-          <div class="phl"><span style="font-size:19px">〰️</span><div><p id="pTit">Trolva 01 — Principal</p><small>Transporte de lodo · Ø 200mm</small></div></div>
-          <span class="mbadge amber" id="pBadge">Revisar</span>
+        <div class="sh">Sensores en tiempo real</div>
+        <div class="pc">
+          <div class="ph">
+            <div class="phl"><span style="font-size:20px">〰️</span><div><p id="pNom">Trolva 01 — Principal</p><small>Transporte de lodo · Ø 200mm</small></div></div>
+            <span class="bdg warn" id="pBdg">Revisar</span>
+          </div>
+          <div class="pvis"><div class="pf warn" id="pFill" style="width:68%"><span id="pPct">68%</span></div></div>
+          <div class="psc"><span>0%</span><span>Caudal nominal (100%)</span></div>
+          <div class="pmg">
+            <div class="pm"><div class="pml">Flujo másico</div><div class="pmv"><span id="mFl">3.40</span><span> kg/s</span></div><div class="pms warn" id="sFl">Bajo del rango</div></div>
+            <div class="pm"><div class="pml">Presión dif.</div><div class="pmv"><span id="mPr">2.10</span><span> bar</span></div><div class="pms warn" id="sPr">Elevada</div></div>
+            <div class="pm"><div class="pml">Densidad lodo</div><div class="pmv"><span id="mDe">1.38</span><span> g/cm³</span></div><div class="pms ok" id="sDe">Normal</div></div>
+            <div class="pm"><div class="pml">Velocidad</div><div class="pmv"><span id="mVe">0.87</span><span> m/s</span></div><div class="pms warn" id="sVe">Reducida</div></div>
+          </div>
         </div>
-        <div class="pvis"><div class="pf warn" id="pFill" style="width:68%"><span id="pPct">68%</span></div></div>
-        <div class="psc"><span>0%</span><span>Caudal nominal (100%)</span></div>
-        <div class="pmg">
-          <div class="pm"><div class="pml">Flujo másico</div><div class="pmv"><span id="mFl">3.40</span> <span>kg/s</span></div><div class="pms warn" id="sFl">Bajo del rango</div></div>
-          <div class="pm"><div class="pml">Presión dif.</div><div class="pmv"><span id="mPr">2.10</span> <span>bar</span></div><div class="pms warn" id="sPr">Elevada</div></div>
-          <div class="pm"><div class="pml">Densidad lodo</div><div class="pmv"><span id="mDe">1.38</span> <span>g/cm³</span></div><div class="pms ok" id="sDe">Normal</div></div>
-          <div class="pm"><div class="pml">Velocidad</div><div class="pmv"><span id="mVe">0.87</span> <span>m/s</span></div><div class="pms warn" id="sVe">Reducida</div></div>
+        <div class="sh">Mantenimiento preventivo</div>
+        <div class="ml">
+          <div class="mi" id="mT1"><div class="mii red">🔧</div><div class="mib"><strong>Inspección obstrucción · Trolva 01</strong><small>Urgente · Lodo acumulado estimado</small></div><button class="mdb" onclick="mListo('T1',this)">✅ Listo</button></div>
+          <div class="mi" id="mT2"><div class="mii amber">🧹</div><div class="mib"><strong>Limpieza sensor · Trolva 02</strong><small>Próximas 48 h · Lectura con ruido</small></div><button class="mdb" onclick="mListo('T2',this)">✅ Listo</button></div>
+          <div class="mi" id="mT3"><div class="mii green">✅</div><div class="mib"><strong>Calibración completada · Trolva 03</strong><small>Hoy 07:00 · Sin anomalías</small></div><button class="mdb" disabled>Completado</button></div>
+          <div class="mi" id="mT4"><div class="mii amber">🔩</div><div class="mib"><strong>Revisión válvula · Trolva 04</strong><small>Esta semana · Presión variable</small></div><button class="mdb" onclick="mListo('T4',this)">✅ Listo</button></div>
+        </div>
+        <div class="sh">Registro de eventos</div>
+        <div id="hLog">
+          <div class="hi"><div class="hid amber"></div><div><p>Flujo reducido · Trolva 01</p><small>Hoy 08:42 · Sensor de flujo másico</small></div></div>
+          <div class="hi"><div class="hid amber"></div><div><p>Presión variable · Trolva 04</p><small>Hoy 07:55 · Sensor de presión</small></div></div>
+          <div class="hi"><div class="hid green"></div><div><p>Calibración completada · Trolva 03</p><small>Hoy 07:00 · Sin anomalías</small></div></div>
         </div>
       </div>
-      <div class="sh">Mantenimiento preventivo</div>
-      <div class="ml">
-        <div class="mi" id="mt-T-01"><div class="mii red">🔧</div><div class="mib"><strong>Inspección obstrucción · Trolva 01</strong><small>Programar urgente · Lodo acumulado estimado</small></div><button class="mdb" onclick="mDone('T-01',this)">✅ Listo</button></div>
-        <div class="mi" id="mt-T-02"><div class="mii amber">🧹</div><div class="mib"><strong>Limpieza sensor de flujo · Trolva 02</strong><small>Próximas 48 h · Lectura con ruido detectado</small></div><button class="mdb" onclick="mDone('T-02',this)">✅ Listo</button></div>
-        <div class="mi" id="mt-T-03"><div class="mii green">✅</div><div class="mib"><strong>Calibración completada · Trolva 03</strong><small>Hoy 07:00 · Sin anomalías detectadas</small></div><button class="mdb" disabled>Completado</button></div>
-        <div class="mi" id="mt-T-04"><div class="mii amber">🔩</div><div class="mib"><strong>Revisión de válvula · Trolva 04</strong><small>Esta semana · Presión variable detectada</small></div><button class="mdb" onclick="mDone('T-04',this)">✅ Listo</button></div>
-      </div>
-      <div class="sh">Registro de eventos</div>
-      <div id="hLog">
-        <div class="hi"><div class="hid amber"></div><div><p>Flujo reducido · Trolva 01</p><small>Hoy, 08:42 · Sensor de flujo másico</small></div></div>
-        <div class="hi"><div class="hid amber"></div><div><p>Presión variable · Trolva 04</p><small>Hoy, 07:55 · Sensor de presión diferencial</small></div></div>
-        <div class="hi"><div class="hid green"></div><div><p>Calibración completada · Trolva 03</p><small>Hoy, 07:00 · Sin anomalías</small></div></div>
-      </div>
-    </div>
 
-    <!-- CHARTS -->
-    <div id="tCharts" class="sc" style="display:none">
-      <div class="sh">Vista histórica — últimas 24 h</div>
-      <div class="pills">
-        <div class="pill active" data-m="flow" onclick="swChart(this)">Flujo másico</div>
-        <div class="pill" data-m="press" onclick="swChart(this)">Presión</div>
-        <div class="pill" data-m="dens" onclick="swChart(this)">Densidad</div>
-        <div class="pill" data-m="vel" onclick="swChart(this)">Velocidad</div>
+      <!-- GRÁFICOS -->
+      <div id="tCharts" class="sc" style="display:none">
+        <div class="sh">Vista histórica — 24 h</div>
+        <div class="pills" id="mpills">
+          <div class="pill on" data-m="flow" onclick="swMet(this)">Flujo másico</div>
+          <div class="pill" data-m="press" onclick="swMet(this)">Presión</div>
+          <div class="pill" data-m="dens" onclick="swMet(this)">Densidad</div>
+          <div class="pill" data-m="vel" onclick="swMet(this)">Velocidad</div>
+        </div>
+        <div class="pills" id="cpills">
+          <div class="pill on" data-cp="T1" onclick="swTrolvaChart(this)">Trolva 01</div>
+          <div class="pill" data-cp="T2" onclick="swTrolvaChart(this)">Trolva 02</div>
+          <div class="pill" data-cp="T3" onclick="swTrolvaChart(this)">Trolva 03</div>
+          <div class="pill" data-cp="T4" onclick="swTrolvaChart(this)">Trolva 04</div>
+        </div>
+        <div class="cc">
+          <h3 id="cTit">Flujo másico — Trolva 01</h3>
+          <small>Últimas 24 horas · Actualización en tiempo real</small>
+          <div class="cw"><canvas id="cLine"></canvas></div>
+        </div>
+        <div class="sr">
+          <div class="sb"><div class="slbl">Promedio 24h</div><div class="sval" id="sAvg">— <span>kg/s</span></div><div class="ssub pms ok">Calculando...</div></div>
+          <div class="sb"><div class="slbl">Mínimo</div><div class="sval" id="sMin">— <span>kg/s</span></div><div class="ssub pms warn">—</div></div>
+          <div class="sb"><div class="slbl">Máximo</div><div class="sval" id="sMax">— <span>kg/s</span></div><div class="ssub pms ok">—</div></div>
+          <div class="sb"><div class="slbl">Alertas hoy</div><div class="sval">3 <span>eventos</span></div><div class="ssub pms warn">Requiere atención</div></div>
+        </div>
+        <div class="cc">
+          <h3>Comparativa de trolvas — flujo actual</h3>
+          <small>Flujo másico en kg/s por trolva</small>
+          <div class="cw"><canvas id="cBar"></canvas></div>
+        </div>
+        <div class="cc">
+          <h3>Estado general — % del caudal nominal</h3>
+          <small>Porcentaje de caudal por trolva</small>
+          <div class="cw"><canvas id="cDona"></canvas></div>
+        </div>
       </div>
-      <div class="pills" style="margin-top:-6px">
-        <div class="pill active" data-cp="T-01" onclick="swChartPipe(this)">Trolva 01</div>
-        <div class="pill" data-cp="T-02" onclick="swChartPipe(this)">Trolva 02</div>
-        <div class="pill" data-cp="T-03" onclick="swChartPipe(this)">Trolva 03</div>
-        <div class="pill" data-cp="T-04" onclick="swChartPipe(this)">Trolva 04</div>
-      </div>
-      <div class="cc">
-        <h3 id="cTit">Flujo másico — Trolva 01</h3>
-        <small>Histórico 24 h · Actualización en tiempo real</small>
-        <div class="cw"><canvas id="cMain"></canvas></div>
-      </div>
-      <div class="sr">
-        <div class="sb"><div class="sl2">Promedio 24h</div><div class="sv" id="sAvg">3.52 <span>kg/s</span></div><div class="ss pms ok">Dentro del rango</div></div>
-        <div class="sb"><div class="sl2">Mínimo</div><div class="sv" id="sMin">2.80 <span>kg/s</span></div><div class="ss pms warn">Bajo a las 03:00</div></div>
-        <div class="sb"><div class="sl2">Máximo</div><div class="sv" id="sMax">4.90 <span>kg/s</span></div><div class="ss pms ok">Pico a las 11:00</div></div>
-        <div class="sb"><div class="sl2">Alertas hoy</div><div class="sv" id="sAlt">3 <span>eventos</span></div><div class="ss pms warn">Requiere atención</div></div>
-      </div>
-      <div class="cc">
-        <h3>Comparativa de trolvas — flujo actual</h3>
-        <small>Flujo másico en kg/s por trolva</small>
-        <div class="cw"><canvas id="cBar"></canvas></div>
-      </div>
-      <div class="cc">
-        <h3>Estado general — caudal nominal</h3>
-        <small>Porcentaje del caudal nominal por trolva</small>
-        <div class="cw"><canvas id="cDona"></canvas></div>
-      </div>
-    </div>
 
-    <!-- ALERTS -->
-    <div id="tAlerts" class="sc" style="display:none">
-      <div class="sh">Centro de alertas</div>
-      <button class="xls-btn" onclick="exportXLS()">📥 Descargar historial en Excel</button>
-      <div class="pills">
-        <div class="pill active" data-f="all" onclick="fAlert(this)">Todas</div>
-        <div class="pill" data-f="crit" onclick="fAlert(this)">Críticas</div>
-        <div class="pill" data-f="warn" onclick="fAlert(this)">Advertencias</div>
-        <div class="pill" data-f="ok" onclick="fAlert(this)">Resueltas</div>
+      <!-- ALERTAS -->
+      <div id="tAlerts" class="sc" style="display:none">
+        <div class="sh">Centro de alertas</div>
+        <button class="xlsbtn" onclick="exportar()">📥 Descargar historial en Excel</button>
+        <div class="pills" id="fpills">
+          <div class="pill on" data-f="all" onclick="filtrar(this)">Todas</div>
+          <div class="pill" data-f="crit" onclick="filtrar(this)">Críticas</div>
+          <div class="pill" data-f="warn" onclick="filtrar(this)">Advertencias</div>
+          <div class="pill" data-f="ok" onclick="filtrar(this)">Resueltas</div>
+        </div>
+        <div id="aList">
+          <div class="ait unr" data-t="crit"><div class="aid red"></div><div class="aib"><p>Obstrucción severa · Trolva 02</p><small>Hoy 09:15 · Flujo 44% del nominal · Sin resolver</small></div><span class="aibdg red">Crítica</span></div>
+          <div class="ait unr" data-t="warn"><div class="aid amber"></div><div class="aib"><p>Flujo másico reducido · Trolva 01</p><small>Hoy 08:42 · Flujo 68% del nominal · Notificado</small></div><span class="aibdg amber">Advertencia</span></div>
+          <div class="ait unr" data-t="warn"><div class="aid amber"></div><div class="aib"><p>Presión variable · Trolva 04</p><small>Hoy 07:55 · 2.4 bar · Revisión pendiente</small></div><span class="aibdg amber">Advertencia</span></div>
+          <div class="ait" data-t="warn"><div class="aid amber"></div><div class="aib"><p>Presión elevada · Trolva 01</p><small>Ayer 22:10 · 2.8 bar · Resuelto automáticamente</small></div><span class="aibdg amber">Advertencia</span></div>
+          <div class="ait" data-t="ok"><div class="aid green"></div><div class="aib"><p>Calibración completada · Trolva 03</p><small>Hoy 07:00 · Sin anomalías</small></div><span class="aibdg green">Resuelta</span></div>
+          <div class="ait" data-t="ok"><div class="aid green"></div><div class="aib"><p>Sistema restaurado · Trolva 02</p><small>Ayer 14:30 · Flujo normalizado</small></div><span class="aibdg green">Resuelta</span></div>
+        </div>
       </div>
-      <div id="aList">
-        <div class="ait unr" data-t="crit" data-trolva="Trolva 02" data-hora="09:15" data-desc="Obstrucción severa — flujo al 44% del nominal" data-estado="Crítica"><div class="aid red"></div><div class="aib" style="flex:1"><p>Obstrucción severa · Trolva 02</p><small>Hoy 09:15 · Flujo 44% del nominal · Sin resolver</small></div><span class="aibadge red">Crítica</span></div>
-        <div class="ait unr" data-t="warn" data-trolva="Trolva 01" data-hora="08:42" data-desc="Flujo másico reducido — flujo al 68% del nominal" data-estado="Advertencia"><div class="aid amber"></div><div class="aib" style="flex:1"><p>Flujo másico reducido · Trolva 01</p><small>Hoy 08:42 · Flujo 68% del nominal · Notificado</small></div><span class="aibadge amber">Advertencia</span></div>
-        <div class="ait unr" data-t="warn" data-trolva="Trolva 04" data-hora="07:55" data-desc="Presión variable detectada — 2.4 bar" data-estado="Advertencia"><div class="aid amber"></div><div class="aib" style="flex:1"><p>Presión variable detectada · Trolva 04</p><small>Hoy 07:55 · 2.4 bar · Revisión pendiente</small></div><span class="aibadge amber">Advertencia</span></div>
-        <div class="ait" data-t="warn" data-trolva="Trolva 01" data-hora="22:10" data-desc="Presión diferencial elevada — 2.8 bar" data-estado="Resuelta"><div class="aid amber"></div><div class="aib" style="flex:1"><p>Presión diferencial elevada · Trolva 01</p><small>Ayer 22:10 · 2.8 bar · Resuelto automáticamente</small></div><span class="aibadge amber">Advertencia</span></div>
-        <div class="ait" data-t="ok" data-trolva="Trolva 03" data-hora="07:00" data-desc="Calibración de sensor completada sin anomalías" data-estado="Resuelta"><div class="aid green"></div><div class="aib" style="flex:1"><p>Calibración completada · Trolva 03</p><small>Hoy 07:00 · Sin anomalías detectadas</small></div><span class="aibadge green">Resuelta</span></div>
-        <div class="ait" data-t="ok" data-trolva="Trolva 02" data-hora="14:30" data-desc="Sistema restaurado tras mantención preventiva" data-estado="Resuelta"><div class="aid green"></div><div class="aib" style="flex:1"><p>Sistema restaurado · Trolva 02</p><small>Ayer 14:30 · Flujo normalizado tras mantención</small></div><span class="aibadge green">Resuelta</span></div>
-      </div>
-    </div>
 
-    <!-- CONFIG -->
-    <div id="tConfig" class="sc" style="display:none">
-      <div class="cuc">
-        <div class="cua">👤</div>
-        <div><p id="cuNm">Usuario</p><small id="cuEm">correo@empresa.cl</small><br><small id="cuCo" style="color:#2a6acc;font-size:11px;font-weight:600">Empresa</small></div>
+      <!-- CONFIG -->
+      <div id="tConfig" class="sc" style="display:none">
+        <div class="cuc"><div class="cua">👤</div><div><p id="cuNm">Usuario</p><small id="cuEm">correo@empresa.cl</small><br><small id="cuCo" style="color:#2a7acc;font-weight:700">Empresa</small></div></div>
+        <div class="cfs">
+          <h3>Notificaciones por correo</h3>
+          <div class="cfr"><div class="cfrl"><p>Alertas críticas</p><small>Correo inmediato al detectar obstrucción</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="cfr"><div class="cfrl"><p>Alertas de advertencia</p><small>Correo cuando flujo baja del 75%</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="cfr"><div class="cfrl"><p>Mantención completada</p><small>Correo al registrar mantención</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="cfr"><div class="cfrl"><p>Resumen diario</p><small>Informe a las 08:00 cada mañana</small></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="cfs">
+          <h3>Umbrales de alerta</h3>
+          <div class="cfr"><div class="cfrl"><p>Flujo mínimo aceptable</p><small>Alerta si cae bajo este valor</small></div><span class="cfv">4.0 kg/s</span></div>
+          <div class="cfr"><div class="cfrl"><p>Presión máxima</p><small>Alerta si supera este valor</small></div><span class="cfv">2.5 bar</span></div>
+          <div class="cfr"><div class="cfrl"><p>Densidad máxima del lodo</p><small>Alerta si supera este valor</small></div><span class="cfv">1.50 g/cm³</span></div>
+          <div class="cfr"><div class="cfrl"><p>Intervalo de muestreo</p><small>Frecuencia de lectura</small></div><span class="cfv">2.5 seg</span></div>
+        </div>
+        <div class="cfs">
+          <h3>Trolvas configuradas</h3>
+          <div class="cfr"><div class="cfrl"><p>Trolva 01 — Principal</p><small>Ø 200mm · Transporte lodo primario</small></div><span class="bdg warn">Revisar</span></div>
+          <div class="cfr"><div class="cfrl"><p>Trolva 02 — Derivación</p><small>Ø 150mm · Bypass emergencia</small></div><span class="bdg crit">Crítico</span></div>
+          <div class="cfr"><div class="cfrl"><p>Trolva 03 — Retorno</p><small>Ø 200mm · Retorno al estanque</small></div><span class="bdg ok">Normal</span></div>
+          <div class="cfr"><div class="cfrl"><p>Trolva 04 — Descarga</p><small>Ø 100mm · Descarga final</small></div><span class="bdg warn">Revisar</span></div>
+        </div>
+        <div class="cfs">
+          <h3>Sistema</h3>
+          <div class="cfr"><div class="cfrl"><p>Versión</p><small>AquaMonitor v2.0</small></div><span class="cfv">v2.0</span></div>
+          <div class="cfr"><div class="cfrl"><p>Correo alertas</p><small id="cuEm2">—</small></div><span class="cfv">✓ Verificado</span></div>
+          <div class="cfr"><div class="cfrl"><p>Trolvas activas</p><small>Todas en línea</small></div><span class="cfv">4 / 4</span></div>
+        </div>
+        <button class="xlsbtn" onclick="exportar()">📥 Descargar historial en Excel</button>
+        <button class="dnbtn" onclick="logout()">🚪 Cerrar sesión</button>
       </div>
-      <div class="cfs">
-        <h3>Notificaciones por correo</h3>
-        <div class="cfr"><div class="cfr-l"><p>Alertas críticas</p><small>Correo inmediato al detectar obstrucción</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="cfr"><div class="cfr-l"><p>Alertas de advertencia</p><small>Correo cuando el flujo baja del 75%</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="cfr"><div class="cfr-l"><p>Mantención completada</p><small>Correo al registrar una mantención</small></div><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="cfr"><div class="cfr-l"><p>Resumen diario</p><small>Informe por correo cada mañana a las 08:00</small></div><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
-      </div>
-      <div class="cfs">
-        <h3>Umbrales de alerta</h3>
-        <div class="cfr"><div class="cfr-l"><p>Flujo mínimo aceptable</p><small>Alerta si el flujo cae bajo este valor</small></div><span class="cfv">4.0 kg/s</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Presión máxima</p><small>Alerta si supera este valor</small></div><span class="cfv">2.5 bar</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Densidad máxima del lodo</p><small>Alerta si supera este valor</small></div><span class="cfv">1.50 g/cm³</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Intervalo de muestreo</p><small>Frecuencia de lectura de sensores</small></div><span class="cfv">2.5 seg</span></div>
-      </div>
-      <div class="cfs">
-        <h3>Trolvas configuradas</h3>
-        <div class="cfr"><div class="cfr-l"><p>Trolva 01 — Principal</p><small>Ø 200mm · Transporte lodo primario</small></div><span class="mbadge amber">Revisar</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Trolva 02 — Derivación</p><small>Ø 150mm · Bypass de emergencia</small></div><span class="mbadge red">Crítico</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Trolva 03 — Retorno</p><small>Ø 200mm · Retorno al estanque</small></div><span class="mbadge green">Normal</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Trolva 04 — Descarga</p><small>Ø 100mm · Descarga final</small></div><span class="mbadge amber">Revisar</span></div>
-      </div>
-      <div class="cfs">
-        <h3>Sistema</h3>
-        <div class="cfr"><div class="cfr-l"><p>Versión de la app</p><small>AquaMonitor v1.3.0</small></div><span class="cfv">v1.3.0</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Correo de alertas</p><small id="cuEm2">—</small></div><span class="cfv">✓ Verificado</span></div>
-        <div class="cfr"><div class="cfr-l"><p>Trolvas activas</p><small>Todas en línea y monitoreadas</small></div><span class="cfv">4 / 4</span></div>
-      </div>
-      <button class="xls-btn" onclick="exportXLS()" style="margin-top:4px">📥 Descargar historial en Excel</button>
-      <button class="cdng" onclick="doLogout()">🚪 Cerrar sesión</button>
-    </div>
 
-    </div><!-- /tab wrapper -->
+    </div><!-- /tabWrap -->
 
     <div class="bnav">
-      <div class="ni active" onclick="swNav('Home',this)"><span class="nic">📊</span><span class="nit">Inicio</span></div>
-      <div class="ni" onclick="swNav('Charts',this)"><span class="nic">📈</span><span class="nit">Gráficos</span></div>
-      <div class="ni" onclick="swNav('Alerts',this)"><span class="nic">🔔</span><span class="nit">Alertas</span><span class="nbadge" id="nBadge">3</span></div>
-      <div class="ni" onclick="swNav('Config',this)"><span class="nic">⚙️</span><span class="nit">Config.</span></div>
+      <div class="ni on" id="niHome" onclick="irTab('Home',this)"><span class="nic">📊</span><span class="nit">Inicio</span></div>
+      <div class="ni" id="niCharts" onclick="irTab('Charts',this)"><span class="nic">📈</span><span class="nit">Gráficos</span></div>
+      <div class="ni" id="niAlerts" onclick="irTab('Alerts',this)"><span class="nic">🔔</span><span class="nit">Alertas</span><span class="nbdg" id="nbdg">3</span></div>
+      <div class="ni" id="niConfig" onclick="irTab('Config',this)"><span class="nic">⚙️</span><span class="nit">Config.</span></div>
     </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-const EMAILJS_PUBLIC_KEY  = 'PVgnT5CLqog_-Nmqp';
-const EMAILJS_SERVICE_ID  = 'service_hducvxq';
-const EMAILJS_TEMPLATE_ID = 'template_uqlcsng';
+// ══ CONFIG ══
+const EJS_KEY  = 'PVgnT5CLqog_-Nmqp';
+const EJS_SVC  = 'service_hducvxq';
+const EJS_TPL  = 'template_uqlcsng';
 
-let usr={email:'',name:'',company:''}, otp='', curPipe='T-01';
-let liveIv=null, chartM=null, chartB=null, chartD=null;
-let curMetric='flow', curChartPipe='T-01';
-
-// Array de alertas para el Excel (se va llenando dinámicamente)
-let alertsLog = [
-  {fecha: hoy(), hora:'09:15', trolva:'Trolva 02', descripcion:'Obstrucción severa detectada', flujo:'2.10 kg/s', presion:'3.20 bar', estado:'Crítica', notificado:'No'},
-  {fecha: hoy(), hora:'08:42', trolva:'Trolva 01', descripcion:'Flujo másico reducido al 68% del nominal', flujo:'3.40 kg/s', presion:'2.10 bar', estado:'Advertencia', notificado:'Sí'},
-  {fecha: hoy(), hora:'07:55', trolva:'Trolva 04', descripcion:'Presión variable detectada — 2.4 bar', flujo:'3.80 kg/s', presion:'2.40 bar', estado:'Advertencia', notificado:'No'},
-  {fecha: ayer(), hora:'22:10', trolva:'Trolva 01', descripcion:'Presión diferencial elevada — 2.8 bar', flujo:'3.60 kg/s', presion:'2.80 bar', estado:'Resuelta', notificado:'Sí'},
-  {fecha: hoy(), hora:'07:00', trolva:'Trolva 03', descripcion:'Calibración de sensor completada sin anomalías', flujo:'5.00 kg/s', presion:'1.40 bar', estado:'Resuelta', notificado:'N/A'},
-  {fecha: ayer(), hora:'14:30', trolva:'Trolva 02', descripcion:'Sistema restaurado tras mantención preventiva', flujo:'4.80 kg/s', presion:'1.60 bar', estado:'Resuelta', notificado:'Sí'},
+// ══ STATE ══
+let usr = {email:'',name:'',company:''};
+let otp = '';
+let curTrolva = 'T1';
+let curMet = 'flow';
+let curCTrolva = 'T1';
+let liveIv = null;
+let charts = {line:null, bar:null, dona:null};
+let alertLog = [
+  {f:hoy(),h:'09:15',t:'Trolva 02',d:'Obstrucción severa — flujo al 44% del nominal',fl:'2.10 kg/s',pr:'3.20 bar',e:'Crítica',n:'No'},
+  {f:hoy(),h:'08:42',t:'Trolva 01',d:'Flujo másico reducido — flujo al 68% del nominal',fl:'3.40 kg/s',pr:'2.10 bar',e:'Advertencia',n:'Sí'},
+  {f:hoy(),h:'07:55',t:'Trolva 04',d:'Presión variable — 2.4 bar',fl:'3.80 kg/s',pr:'2.40 bar',e:'Advertencia',n:'No'},
+  {f:ayer(),h:'22:10',t:'Trolva 01',d:'Presión diferencial elevada — 2.8 bar',fl:'3.60 kg/s',pr:'2.80 bar',e:'Resuelta',n:'Sí'},
+  {f:hoy(),h:'07:00',t:'Trolva 03',d:'Calibración completada sin anomalías',fl:'5.00 kg/s',pr:'1.40 bar',e:'Resuelta',n:'N/A'},
+  {f:ayer(),h:'14:30',t:'Trolva 02',d:'Sistema restaurado tras mantención',fl:'4.80 kg/s',pr:'1.60 bar',e:'Resuelta',n:'Sí'},
 ];
 
-function hoy(){ const d=new Date(); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
-function ayer(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
-
+function hoy(){const d=new Date();return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+function ayer(){const d=new Date();d.setDate(d.getDate()-1);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();}
+function hora(){const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
 const $=id=>document.getElementById(id);
 
-// ── EMAILJS ──
-function ejsInit(){ if(typeof emailjs!=='undefined'){emailjs.init(EMAILJS_PUBLIC_KEY);return true;}return false; }
+// ══ EMAILJS ══
+function ejsInit(){
+  try{if(typeof emailjs!=='undefined'){emailjs.init(EJS_KEY);return true;}}catch(e){}
+  return false;
+}
 function ejsSend(asunto,mensaje,tuberia,flujo){
-  if(!ejsInit())return Promise.reject();
-  return emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+  if(!ejsInit())return Promise.resolve();
+  return emailjs.send(EJS_SVC,EJS_TPL,{
     to_email:usr.email,to_name:usr.name,empresa:usr.company,
     asunto,mensaje,tuberia:tuberia||'',flujo:flujo||''
   });
 }
 
-// ── SCREENS ──
-function setSc(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
-
-// ── TOAST ──
-function toast(msg,sub,type='n'){
-  const t=$('toast'); t.className='toast'+(type==='s'?' ts':type==='e'?' te':'');
-  $('tico').textContent=type==='s'?'✅':type==='e'?'❌':'🔔';
-  $('tmsg').textContent=msg; $('tsub').textContent=sub;
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),4500);
+// ══ SCREENS ══
+function goSc(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
 }
 
-// ── HISTORY ──
-function addH(txt,trolva,dot='amber'){
-  const l=$('hLog'),now=new Date();
-  const timeStr=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
-  const el=document.createElement('div'); el.className='hi';
-  el.innerHTML=`<div class="hid ${dot}"></div><div><p>${txt}</p><small>Hoy, ${timeStr} · ${trolva}</small></div>`;
-  l.insertBefore(el,l.firstChild);
-  // Agregar al log de Excel
-  alertsLog.unshift({fecha:hoy(),hora:timeStr,trolva,descripcion:txt,flujo:$('mFl').textContent+' kg/s',presion:$('mPr').textContent+' bar',estado:dot==='red'?'Crítica':dot==='green'?'Resuelta':'Advertencia',notificado:'Sí'});
+// ══ TOAST ══
+function toast(msg,sub,t='n'){
+  const el=$('toast');
+  el.className='toast'+(t==='s'?' ts':t==='e'?' te':'');
+  $('tico').textContent=t==='s'?'✅':t==='e'?'❌':'🔔';
+  $('tmsg').textContent=msg;$('tsub').textContent=sub;
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),4500);
 }
 
-// ── ERRORS ──
-function showErr(id,msg){ const e=$(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4000); }
+// ══ HISTORY ══
+function addLog(txt,trolva,dot='amber'){
+  const el=document.createElement('div');el.className='hi';
+  el.innerHTML=`<div class="hid ${dot}"></div><div><p>${txt}</p><small>Hoy ${hora()} · ${trolva}</small></div>`;
+  $('hLog').insertBefore(el,$('hLog').firstChild);
+  alertLog.unshift({f:hoy(),h:hora(),t:trolva,d:txt,fl:$('mFl').textContent+' kg/s',pr:$('mPr').textContent+' bar',e:dot==='red'?'Crítica':dot==='green'?'Resuelta':'Advertencia',n:'Sí'});
+}
 
-// ── LOGIN ──
+// ══ ERROR ══
+function err(id,msg){const e=$(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),4000);}
+
+// ══ LOGIN ══
 function swTab(t){
-  $('tL').classList.toggle('active',t==='L'); $('tR').classList.toggle('active',t==='R');
-  $('fL').style.display=t==='L'?'block':'none'; $('fR').style.display=t==='R'?'block':'none';
+  $('tA').classList.toggle('on',t==='A');$('tB').classList.toggle('on',t==='B');
+  $('fA').style.display=t==='A'?'block':'none';$('fB').style.display=t==='B'?'block':'none';
 }
-function tEye(id){ const i=$(id); i.type=i.type==='password'?'text':'password'; }
-function chkStr(v){
+function ojo(id){const i=$(id);i.type=i.type==='password'?'text':'password';}
+function fuerza(v){
   let s=0;if(v.length>=8)s++;if(/[A-Z]/.test(v))s++;if(/[0-9]/.test(v))s++;if(/[^a-zA-Z0-9]/.test(v))s++;
-  const b=$('sBar');
-  b.style.width=['0%','30%','55%','80%','100%'][s];
-  b.style.background=['#e0e8f0','#e06060','#e09030','#40a060','#1a8a40'][s];
+  const f=$('sfill');
+  f.style.width=['0%','30%','55%','80%','100%'][s];
+  f.style.background=['#e4eaf4','#e06060','#e09030','#40a060','#1a8040'][s];
 }
-function doLogin(){
+function login(){
   const e=$('lEm').value.trim(),p=$('lPw').value;
-  if(!e||!p){showErr('eL','Ingresa tu correo y contraseña.');return}
-  const btn=$('btnL'); btn.disabled=true; btn.textContent='Verificando...';
+  if(!e||!p){err('eA','Ingresa tu correo y contraseña.');return;}
+  const b=$('btnL');b.disabled=true;b.textContent='Verificando...';
   setTimeout(()=>{
-    if(p.length>=3){usr={email:e,name:e.split('@')[0],company:e.split('@')[1]||'Mi empresa'};enterDash();}
-    else showErr('eL','Credenciales incorrectas.');
-    btn.disabled=false; btn.textContent='Ingresar';
+    if(p.length>=3){
+      usr={email:e,name:e.split('@')[0],company:e.split('@')[1]||'Mi empresa'};
+      entrar();
+    } else err('eA','Credenciales incorrectas.');
+    b.disabled=false;b.textContent='Ingresar';
   },900);
 }
-function doReg(){
+function registrar(){
   const nm=$('rNm').value.trim(),co=$('rCo').value.trim(),sec=$('rSec').value,
         em=$('rEm').value.trim(),p=$('rPw').value,p2=$('rPw2').value;
-  if(!nm||!co||!sec||!em||!p||!p2){showErr('eR','Completa todos los campos.');return}
-  if(!em.includes('@')||!em.includes('.')){showErr('eR','Correo corporativo inválido.');return}
-  if(p.length<8){showErr('eR','Contraseña mínimo 8 caracteres.');return}
-  if(p!==p2){showErr('eR','Las contraseñas no coinciden.');return}
+  if(!nm||!co||!sec||!em||!p||!p2){err('eB','Completa todos los campos.');return;}
+  if(!em.includes('@')){err('eB','Correo inválido.');return;}
+  if(p.length<8){err('eB','Contraseña mínimo 8 caracteres.');return;}
+  if(p!==p2){err('eB','Las contraseñas no coinciden.');return;}
   usr={email:em,name:nm,company:co};
-  const btn=$('btnR'); btn.disabled=true; btn.textContent='Enviando código...';
+  const b=$('btnR');b.disabled=true;b.textContent='Enviando código...';
   otp=String(Math.floor(100000+Math.random()*900000));
-  ejsSend('Código de verificación — AquaMonitor','Hola '+nm+', tu código de verificación es:\n\n'+otp+'\n\nExpira en 10 minutos.','','')
-  .finally(()=>{ $('vEm').textContent=em; setSc('sVer'); btn.disabled=false; btn.textContent='Crear cuenta y verificar correo'; });
+  ejsSend(
+    'Código de verificación — AquaMonitor',
+    'Hola '+nm+',\n\nTu código de verificación es:\n\n'+otp+'\n\nExpira en 10 minutos.',
+    '',''
+  ).finally(()=>{
+    $('vEm').textContent=em;
+    goSc('sVer');
+    b.disabled=false;b.textContent='Crear cuenta y verificar';
+  });
 }
-function verOTP(){
-  const inputs=document.querySelectorAll('.oi'); let code='';
-  inputs.forEach(i=>code+=i.value);
-  if(code.length<6){showErr('eOtp','Ingresa el código de 6 dígitos completo.');return}
+function verificar(){
+  let code='';document.querySelectorAll('.oi').forEach(i=>code+=i.value);
+  if(code.length<6){err('eOtp','Ingresa los 6 dígitos completos.');return;}
   if(code===otp){
-    const ok=$('okOtp'); ok.textContent='✓ Cuenta verificada. Accediendo...'; ok.classList.add('show');
-    setTimeout(()=>enterDash(),1200);
-  } else showErr('eOtp','Código incorrecto. Inténtalo de nuevo.');
+    const ok=$('okOtp');ok.textContent='✓ Cuenta verificada. Accediendo...';ok.classList.add('show');
+    setTimeout(()=>entrar(),1200);
+  } else err('eOtp','Código incorrecto. Inténtalo de nuevo.');
 }
-function resend(){
+function reenviar(){
   otp=String(Math.floor(100000+Math.random()*900000));
   ejsSend('Nuevo código — AquaMonitor','Tu nuevo código es: '+otp+'\n\nExpira en 10 minutos.','','')
-  .finally(()=>{ const ok=$('okOtp'); ok.textContent='📧 Código enviado a '+usr.email; ok.classList.add('show'); setTimeout(()=>ok.classList.remove('show'),3500); });
+  .finally(()=>{
+    const ok=$('okOtp');ok.textContent='📧 Código reenviado a '+usr.email;
+    ok.classList.add('show');setTimeout(()=>ok.classList.remove('show'),4000);
+  });
 }
-function goLogin(){ setSc('sLogin'); }
-function enterDash(){
+function goLogin(){goSc('sLogin');}
+
+// ══ ENTER DASH ══
+function entrar(){
   $('dCo').textContent=usr.company;
-  $('cuNm').textContent=usr.name; $('cuEm').textContent=usr.email;
-  $('cuCo').textContent=usr.company; $('cuEm2').textContent=usr.email;
-  // Reset todos los tabs — limpiar inline styles y mostrar solo Home
-  ['Home','Charts','Alerts','Config'].forEach(t=>{
-    const e=$('t'+t); if(!e)return;
-    e.removeAttribute('style');
-    e.style.display='none';
-  });
-  // Activar Home con estilos correctos
-  const home=$('tHome');
-  if(home){
-    home.style.display='flex';
-    home.style.flex='1';
-    home.style.flexDirection='column';
-    home.style.overflowY='auto';
-    home.style.webkitOverflowScrolling='touch';
-    home.style.minHeight='0';
-    home.style.padding='12px 15px 20px';
-  }
+  $('cuNm').textContent=usr.name;
+  $('cuEm').textContent=usr.email;
+  $('cuCo').textContent=usr.company;
+  $('cuEm2').textContent=usr.email;
+  // Reset todos los tabs
+  resetTabs();
+  // Activar Home
+  activarTab('Home');
   // Reset nav
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
-  const firstNav=document.querySelector('.ni');
-  if(firstNav)firstNav.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  $('niHome').classList.add('on');
   // Reset badge
-  const nb=$('nBadge'); if(nb){nb.textContent='3';nb.style.display='block';}
-  // Reset botones de alerta
-  const btnN=$('btnN'); if(btnN){btnN.style.display='';btnN.disabled=false;btnN.textContent='🔔 Notificar al equipo';}
-  const btnD=$('btnD'); if(btnD)btnD.classList.remove('vis');
-  setSc('sDash'); startLive();
+  const nb=$('nbdg');if(nb){nb.textContent='3';nb.style.display='block';}
+  // Reset botones alerta
+  const bN=$('btnN');if(bN){bN.style.display='';bN.disabled=false;bN.textContent='🔔 Notificar al equipo';}
+  const bD=$('btnD');if(bD)bD.classList.remove('vis');
+  goSc('sDash');
+  startLive();
 }
-function doLogout(){
-  document.querySelectorAll('.oi').forEach(i=>i.value='');
-  $('lEm').value=''; $('lPw').value='';
+
+// ══ LOGOUT ══
+function logout(){
   if(liveIv){clearInterval(liveIv);liveIv=null;}
-  if(chartM){chartM.destroy();chartM=null;}
-  if(chartB){chartB.destroy();chartB=null;}
-  if(chartD){chartD.destroy();chartD=null;}
-  // Reset selección de trolva
-  document.querySelectorAll('#pipePills .pill').forEach((p,i)=>p.classList.toggle('active',i===0));
-  curPipe='T-01'; curMetric='flow'; curChartPipe='T-01';
-  setSc('sLogin');
+  ['line','bar','dona'].forEach(k=>{if(charts[k]){charts[k].destroy();charts[k]=null;}});
+  curTrolva='T1';curMet='flow';curCTrolva='T1';
+  document.querySelectorAll('.oi').forEach(i=>i.value='');
+  $('lEm').value='';$('lPw').value='';
+  goSc('sLogin');
 }
 
-// ── NAV ──
-function swNav(tab,el){
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active')); el.classList.add('active');
+// ══ TABS ══
+function resetTabs(){
   ['Home','Charts','Alerts','Config'].forEach(t=>{
-    const e=$('t'+t); if(!e)return;
-    e.removeAttribute('style');
-    if(t===tab){
-      e.style.display='flex'; e.style.flex='1';
-      e.style.flexDirection='column'; e.style.overflowY='auto';
-      e.style.webkitOverflowScrolling='touch'; e.style.minHeight='0';
-      e.style.padding='12px 15px 20px';
-    } else {
-      e.style.display='none';
-    }
+    const e=$('t'+t);if(!e)return;
+    e.style.cssText='display:none';
   });
-  if(tab==='Charts'){ setTimeout(()=>initCharts(),80); }
-  if(tab==='Alerts'){ $('nBadge').style.display='none'; }
+}
+function activarTab(t){
+  const e=$('t'+t);if(!e)return;
+  e.style.cssText='display:flex;flex:1;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 24px;min-height:0';
+}
+function irTab(tab,el){
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  el.classList.add('on');
+  resetTabs();
+  activarTab(tab);
+  if(tab==='Charts')setTimeout(()=>initCharts(),80);
+  if(tab==='Alerts'){const nb=$('nbdg');if(nb)nb.style.display='none';}
 }
 
-// ── PIPE DATA ──
-const PD={
-  'T-01':{name:'Trolva 01 — Principal',pct:68,fl:3.40,pr:2.10,de:1.38,ve:0.87,st:'warn',badge:'Revisar',at:'warn',atit:'Flujo másico reducido — Trolva 01',adesc:'68% del caudal nominal · Posible obstrucción de lodo'},
-  'T-02':{name:'Trolva 02 — Derivación',pct:44,fl:2.10,pr:3.20,de:1.52,ve:0.54,st:'crit',badge:'Crítico',at:'crit',atit:'Alerta crítica: obstrucción severa — Trolva 02',adesc:'44% del caudal · Inspección inmediata requerida'},
-  'T-03':{name:'Trolva 03 — Retorno',pct:95,fl:5.00,pr:1.40,de:1.35,ve:1.28,st:'ok',badge:'Normal',at:'ok',atit:'Flujo operando correctamente — Trolva 03',adesc:'95% del caudal nominal · Sin anomalías detectadas'},
-  'T-04':{name:'Trolva 04 — Descarga',pct:72,fl:3.80,pr:2.40,de:1.42,ve:0.94,st:'warn',badge:'Revisar',at:'warn',atit:'Presión variable detectada — Trolva 04',adesc:'72% del caudal · Válvula con comportamiento irregular'}
+// ══ TROLVA DATA ══
+const TD={
+  T1:{nom:'Trolva 01 — Principal',pct:68,fl:3.40,pr:2.10,de:1.38,ve:0.87,st:'warn',bdg:'Revisar',at:'warn',atit:'Flujo másico reducido — Trolva 01',adesc:'68% del caudal nominal · Posible obstrucción de lodo'},
+  T2:{nom:'Trolva 02 — Derivación',pct:44,fl:2.10,pr:3.20,de:1.52,ve:0.54,st:'crit',bdg:'Crítico',at:'crit',atit:'Alerta crítica: obstrucción severa — Trolva 02',adesc:'44% del caudal · Inspección inmediata requerida'},
+  T3:{nom:'Trolva 03 — Retorno',pct:95,fl:5.00,pr:1.40,de:1.35,ve:1.28,st:'ok',bdg:'Normal',at:'ok',atit:'Flujo operando correctamente — Trolva 03',adesc:'95% del caudal nominal · Sin anomalías'},
+  T4:{nom:'Trolva 04 — Descarga',pct:72,fl:3.80,pr:2.40,de:1.42,ve:0.94,st:'warn',bdg:'Revisar',at:'warn',atit:'Presión variable — Trolva 04',adesc:'72% del caudal · Válvula con comportamiento irregular'}
 };
 
-function selPipe(el){
-  document.querySelectorAll('#pipePills .pill').forEach(p=>p.classList.remove('active')); el.classList.add('active');
-  curPipe=el.dataset.pipe; const d=PD[curPipe];
-  $('pTit').textContent=d.name;
-  $('pFill').className='pf '+d.st; $('pFill').style.width=d.pct+'%'; $('pPct').textContent=d.pct+'%';
-  $('mFl').textContent=d.fl.toFixed(2); $('mPr').textContent=d.pr.toFixed(2);
-  $('mDe').textContent=d.de.toFixed(2); $('mVe').textContent=d.ve.toFixed(2);
-  $('pBadge').textContent=d.badge;
-  $('pBadge').className='mbadge '+(d.st==='ok'?'green':d.st==='crit'?'red':'amber');
-  const ab=$('abanner'); ab.className='ab '+d.at;
+function selTrolva(el){
+  document.querySelectorAll('#ppills .pill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  curTrolva=el.dataset.p;
+  const d=TD[curTrolva];
+  $('pNom').textContent=d.nom;
+  $('pFill').className='pf '+d.st;$('pFill').style.width=d.pct+'%';$('pPct').textContent=d.pct+'%';
+  $('mFl').textContent=d.fl.toFixed(2);$('mPr').textContent=d.pr.toFixed(2);
+  $('mDe').textContent=d.de.toFixed(2);$('mVe').textContent=d.ve.toFixed(2);
+  $('pBdg').textContent=d.bdg;$('pBdg').className='bdg '+(d.st==='ok'?'ok':d.st==='crit'?'crit':'warn');
+  $('abanner').className='ab '+d.at;
   $('abic').textContent=d.at==='ok'?'✅':d.at==='crit'?'🚨':'⚠️';
-  $('abtit').textContent=d.atit; $('abdesc').textContent=d.adesc;
-  $('btnN').disabled=false; $('btnN').textContent='🔔 Notificar al equipo';
+  $('abtit').textContent=d.atit;$('abdesc').textContent=d.adesc;
+  $('btnN').disabled=false;$('btnN').textContent='🔔 Notificar al equipo';$('btnN').style.display='';
   $('btnD').classList.remove('vis');
   const ss=[$('sFl'),$('sPr'),$('sDe'),$('sVe')];
   ss.forEach((s,i)=>{
@@ -679,145 +684,147 @@ function selPipe(el){
   });
 }
 
-// ── SEND ALERT ──
-function sendAlert(){
-  const btn=$('btnN'); btn.disabled=true; btn.textContent='📤 Enviando...';
-  const d=PD[curPipe];
-  const msg='Se detectó una alerta en '+d.name+'.\n\nEstado: '+d.badge+'\nFlujo másico: '+$('mFl').textContent+' kg/s ('+d.pct+'% del caudal nominal)\nPresión diferencial: '+$('mPr').textContent+' bar\nDensidad del lodo: '+$('mDe').textContent+' g/cm³\nVelocidad: '+$('mVe').textContent+' m/s\n\n'+d.adesc+'\n\nSe requiere revisión del equipo de mantenimiento.';
-  ejsSend('🚨 ALERTA DE SENSOR — '+d.name,msg,d.name,$('mFl').textContent+' kg/s ('+d.pct+'% nominal)')
+// ══ ALERT EMAIL ══
+function enviarAlerta(){
+  const b=$('btnN');b.disabled=true;b.textContent='📤 Enviando...';
+  const d=TD[curTrolva];
+  const msg='Alerta detectada en '+d.nom+'.\n\nEstado: '+d.bdg+'\nFlujo: '+$('mFl').textContent+' kg/s ('+d.pct+'% del nominal)\nPresión: '+$('mPr').textContent+' bar\nDensidad: '+$('mDe').textContent+' g/cm³\nVelocidad: '+$('mVe').textContent+' m/s\n\n'+d.adesc+'\n\nSe requiere revisión de mantenimiento.';
+  ejsSend('🚨 ALERTA — '+d.nom,msg,d.nom,$('mFl').textContent+' kg/s')
   .then(()=>{
-    btn.textContent='✓ Equipo notificado'; $('btnD').classList.add('vis');
-    toast('Alerta enviada por correo','Notificado a '+usr.email);
-    addH('Alerta enviada · '+d.badge,d.name,'red');
-  }).catch(()=>{ btn.disabled=false; btn.textContent='🔔 Notificar al equipo'; toast('Error al enviar','Verifica tu conexión','e'); });
+    b.textContent='✓ Equipo notificado';$('btnD').classList.add('vis');
+    toast('Alerta enviada','Correo enviado a '+usr.email);
+    addLog('Alerta enviada · '+d.bdg,d.nom,'red');
+  }).catch(()=>{
+    b.disabled=false;b.textContent='🔔 Notificar al equipo';
+    toast('Error al enviar','Verifica tu conexión','e');
+  });
 }
 
-// ── MARK DONE ──
-function markDone(){
-  const btn=$('btnD'); btn.style.opacity='.5'; btn.style.pointerEvents='none';
-  const d=PD[curPipe];
-  const msg='La mantención de '+d.name+' fue completada exitosamente.\n\nFlujo actual: '+$('mFl').textContent+' kg/s\n\nEstado actualizado a NORMAL en AquaMonitor.';
-  ejsSend('✅ MANTENCIÓN COMPLETADA — '+d.name,msg,d.name,$('mFl').textContent+' kg/s')
+// ══ MANTENCION LISTA ══
+function mantLista(){
+  const b=$('btnD');b.disabled=true;b.style.opacity='.5';
+  const d=TD[curTrolva];
+  const msg='Mantención completada en '+d.nom+'.\n\nFlujo actual: '+$('mFl').textContent+' kg/s\nEstado actualizado a NORMAL en AquaMonitor.';
+  ejsSend('✅ MANTENCIÓN COMPLETADA — '+d.nom,msg,d.nom,$('mFl').textContent+' kg/s')
   .finally(()=>{
-    const ab=$('abanner'); ab.className='ab ok';
-    $('abic').textContent='✅'; $('abtit').textContent='Mantención completada — '+d.name;
+    $('abanner').className='ab ok';
+    $('abic').textContent='✅';$('abtit').textContent='Mantención completada — '+d.nom;
     $('abdesc').textContent='Intervención registrada · Estado normalizado';
-    $('btnN').style.display='none'; btn.classList.remove('vis');
-    toast('Mantención registrada',d.name+' · Estado normalizado','s');
-    addH('Mantención completada',d.name,'green');
-    const nb=$('nBadge'); const v=Math.max(0,(parseInt(nb.textContent)||0)-1);
-    nb.textContent=v; if(v<=0)nb.style.display='none';
+    $('btnN').style.display='none';b.classList.remove('vis');
+    toast('Mantención registrada',d.nom+' · Normalizado','s');
+    addLog('Mantención completada',d.nom,'green');
+    const nb=$('nbdg');if(nb){const v=Math.max(0,(parseInt(nb.textContent)||0)-1);nb.textContent=v;if(v<=0)nb.style.display='none';}
   });
 }
-
-function mDone(key,btn){
-  btn.disabled=true; btn.textContent='⏳...'; const d=PD[key];
-  ejsSend('✅ TAREA COMPLETADA — '+d.name,'Tarea completada: '+d.name+'\nPor: '+usr.name,d.name,'')
+function mListo(key,b){
+  b.disabled=true;b.textContent='⏳...';
+  const d=TD[key];
+  ejsSend('✅ TAREA COMPLETADA — '+d.nom,'Tarea completada: '+d.nom+'\nPor: '+usr.name,d.nom,'')
   .finally(()=>{
-    btn.textContent='Completado';
-    const mi=$('mt-'+key);
-    if(mi){mi.querySelector('.mii').className='mii green';mi.querySelector('.mii').textContent='✅';}
-    toast('Tarea completada',d.name+' · Registrado','s');
-    addH('Tarea completada',d.name,'green');
-    const nb=$('nBadge'); const v=Math.max(0,(parseInt(nb.textContent)||0)-1);
-    nb.textContent=v; if(v<=0)nb.style.display='none';
+    b.textContent='Completado';
+    const mi=$('m'+key);if(mi){mi.querySelector('.mii').className='mii green';mi.querySelector('.mii').textContent='✅';}
+    toast('Tarea completada',d.nom,'s');
+    addLog('Tarea completada',d.nom,'green');
+    const nb=$('nbdg');if(nb){const v=Math.max(0,(parseInt(nb.textContent)||0)-1);nb.textContent=v;if(v<=0)nb.style.display='none';}
   });
 }
 
-// ── FILTER ALERTS ──
-function fAlert(el){
-  document.querySelectorAll('#tAlerts .pill').forEach(p=>p.classList.remove('active')); el.classList.add('active');
+// ══ FILTER ALERTS ══
+function filtrar(el){
+  document.querySelectorAll('#fpills .pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');
   const f=el.dataset.f;
-  document.querySelectorAll('.ait').forEach(it=>{ it.style.display=(f==='all'||it.dataset.t===f)?'flex':'none'; });
+  document.querySelectorAll('.ait').forEach(it=>{it.style.display=(f==='all'||it.dataset.t===f)?'flex':'none';});
 }
 
-// ── EXPORT EXCEL ──
-function exportXLS(){
-  // Genera CSV que Excel abre directamente — sin dependencia externa
-  const BOM='﻿';
-  const sep=';';
-  const esc=v=>'"'+String(v).replace(/"/g,'""')+'"';
-
-  // Hoja 1 — Historial completo
-  const h1=['Fecha','Hora','Trolva','Descripción del evento','Flujo másico','Presión diferencial','Estado','Notificado'];
-  const filas1=alertsLog.map(a=>[a.fecha,a.hora,a.trolva,a.descripcion,a.flujo,a.presion,a.estado,a.notificado]);
-  let csv=BOM+h1.map(esc).join(sep)+'
-';
-  filas1.forEach(r=>{ csv+=r.map(esc).join(sep)+'
-'; });
-
-  const fecha=new Date();
-  const fn='AquaMonitor_Alertas_'+fecha.getDate()+'_'+(fecha.getMonth()+1)+'_'+fecha.getFullYear()+'.csv';
+// ══ EXPORT CSV (Excel compatible) ══
+function exportar(){
+  const BOM='\uFEFF',sep=';',esc=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const cab=['Fecha','Hora','Trolva','Descripción del evento','Flujo másico','Presión diferencial','Estado','Notificado'];
+  let csv=BOM+cab.map(esc).join(sep)+'\n';
+  alertLog.forEach(r=>csv+=[r.f,r.h,r.t,r.d,r.fl,r.pr,r.e,r.n].map(esc).join(sep)+'\n');
+  const d=new Date(),fn='AquaMonitor_Alertas_'+d.getDate()+'_'+(d.getMonth()+1)+'_'+d.getFullYear()+'.csv';
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=fn; a.style.display='none';
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },1000);
-  toast('Archivo descargado','Se abre con Excel: '+fn,'s');
+  const a=document.createElement('a');a.href=url;a.download=fn;a.style.display='none';
+  document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);
+  toast('Archivo descargado',fn,'s');
 }
 
-// ── CHARTS ──
+// ══ CHARTS ══
 const CL=['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','Ahora'];
 const CD={
-  'T-01':{flow:[4.2,3.8,3.5,2.8,3.6,4.9,4.5,4.1,3.4,3.2,3.8,4.0,3.4],press:[1.5,1.6,1.8,2.2,2.0,1.4,1.5,1.7,2.1,2.3,1.9,1.7,2.1],dens:[1.35,1.36,1.37,1.40,1.38,1.35,1.36,1.37,1.38,1.39,1.38,1.37,1.38],vel:[1.1,0.98,0.90,0.72,0.92,1.25,1.15,1.05,0.87,0.82,0.97,1.02,0.87]},
-  'T-02':{flow:[2.5,2.3,2.1,1.9,2.0,2.4,2.3,2.2,2.1,2.0,2.1,2.2,2.1],press:[2.8,2.9,3.0,3.2,3.1,2.7,2.8,3.0,3.2,3.3,3.1,3.0,3.2],dens:[1.48,1.50,1.52,1.54,1.51,1.48,1.50,1.52,1.52,1.53,1.51,1.50,1.52],vel:[0.64,0.59,0.54,0.49,0.51,0.62,0.59,0.56,0.54,0.51,0.54,0.56,0.54]},
-  'T-03':{flow:[5.1,5.0,4.9,5.0,5.1,5.2,5.1,5.0,5.0,4.9,5.0,5.1,5.0],press:[1.3,1.4,1.4,1.5,1.4,1.3,1.4,1.4,1.4,1.5,1.4,1.4,1.4],dens:[1.34,1.35,1.35,1.36,1.35,1.34,1.35,1.35,1.35,1.36,1.35,1.35,1.35],vel:[1.30,1.28,1.26,1.28,1.30,1.32,1.30,1.28,1.28,1.26,1.28,1.30,1.28]},
-  'T-04':{flow:[4.0,3.9,3.8,3.7,3.8,4.1,4.0,3.9,3.8,3.7,3.8,3.9,3.8],press:[2.2,2.3,2.4,2.5,2.4,2.2,2.3,2.4,2.4,2.5,2.4,2.3,2.4],dens:[1.40,1.41,1.42,1.43,1.42,1.40,1.41,1.42,1.42,1.43,1.42,1.41,1.42],vel:[1.02,0.99,0.97,0.95,0.96,1.05,1.02,0.99,0.94,0.95,0.97,0.99,0.94]}
+  T1:{flow:[4.2,3.8,3.5,2.8,3.6,4.9,4.5,4.1,3.4,3.2,3.8,4.0,3.4],press:[1.5,1.6,1.8,2.2,2.0,1.4,1.5,1.7,2.1,2.3,1.9,1.7,2.1],dens:[1.35,1.36,1.37,1.40,1.38,1.35,1.36,1.37,1.38,1.39,1.38,1.37,1.38],vel:[1.1,0.98,0.90,0.72,0.92,1.25,1.15,1.05,0.87,0.82,0.97,1.02,0.87]},
+  T2:{flow:[2.5,2.3,2.1,1.9,2.0,2.4,2.3,2.2,2.1,2.0,2.1,2.2,2.1],press:[2.8,2.9,3.0,3.2,3.1,2.7,2.8,3.0,3.2,3.3,3.1,3.0,3.2],dens:[1.48,1.50,1.52,1.54,1.51,1.48,1.50,1.52,1.52,1.53,1.51,1.50,1.52],vel:[0.64,0.59,0.54,0.49,0.51,0.62,0.59,0.56,0.54,0.51,0.54,0.56,0.54]},
+  T3:{flow:[5.1,5.0,4.9,5.0,5.1,5.2,5.1,5.0,5.0,4.9,5.0,5.1,5.0],press:[1.3,1.4,1.4,1.5,1.4,1.3,1.4,1.4,1.4,1.5,1.4,1.4,1.4],dens:[1.34,1.35,1.35,1.36,1.35,1.34,1.35,1.35,1.35,1.36,1.35,1.35,1.35],vel:[1.30,1.28,1.26,1.28,1.30,1.32,1.30,1.28,1.28,1.26,1.28,1.30,1.28]},
+  T4:{flow:[4.0,3.9,3.8,3.7,3.8,4.1,4.0,3.9,3.8,3.7,3.8,3.9,3.8],press:[2.2,2.3,2.4,2.5,2.4,2.2,2.3,2.4,2.4,2.5,2.4,2.3,2.4],dens:[1.40,1.41,1.42,1.43,1.42,1.40,1.41,1.42,1.42,1.43,1.42,1.41,1.42],vel:[1.02,0.99,0.97,0.95,0.96,1.05,1.02,0.99,0.94,0.95,0.97,0.99,0.94]}
 };
-const MC={flow:{lbl:'Flujo másico (kg/s)',col:'#2a6acc',u:'kg/s'},press:{lbl:'Presión diferencial (bar)',col:'#c07010',u:'bar'},dens:{lbl:'Densidad lodo (g/cm³)',col:'#1a8a40',u:'g/cm³'},vel:{lbl:'Velocidad (m/s)',col:'#7a40cc',u:'m/s'}};
-const gOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a9ab0',font:{size:9}},grid:{color:'#f0f4fa'}},y:{ticks:{color:'#8a9ab0',font:{size:9}},grid:{color:'#f0f4fa'}}}};
+const MC={
+  flow:{lbl:'Flujo másico (kg/s)',col:'#2a7acc',u:'kg/s'},
+  press:{lbl:'Presión diferencial (bar)',col:'#c07010',u:'bar'},
+  dens:{lbl:'Densidad lodo (g/cm³)',col:'#1a8040',u:'g/cm³'},
+  vel:{lbl:'Velocidad (m/s)',col:'#7a40cc',u:'m/s'}
+};
+const gOpt={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8a9ab0',font:{size:9}},grid:{color:'#f0f4f8'}},y:{ticks:{color:'#8a9ab0',font:{size:9}},grid:{color:'#f0f4f8'}}}};
 
 function initCharts(){
-  const m=MC[curMetric],data=CD[curChartPipe][curMetric];
-  chartM=new Chart($('cMain').getContext('2d'),{type:'line',data:{labels:CL,datasets:[{label:m.lbl,data,borderColor:m.col,backgroundColor:m.col+'18',borderWidth:2,pointRadius:3,pointBackgroundColor:m.col,tension:.4,fill:true}]},options:gOpts});
-  chartB=new Chart($('cBar').getContext('2d'),{type:'bar',data:{labels:['Trolva 01','Trolva 02','Trolva 03','Trolva 04'],datasets:[{data:[3.40,2.10,5.00,3.80],backgroundColor:['#ddeafc','#fdd0d0','#d4f0e0','#fde8c0'],borderColor:['#2a6acc','#cc2020','#1a8a40','#a06010'],borderWidth:1.5,borderRadius:6}]},options:{...gOpts,plugins:{legend:{display:false}}}});
-  chartD=new Chart($('cDona').getContext('2d'),{type:'doughnut',data:{labels:['Trolva 01 (68%)','Trolva 02 (44%)','Trolva 03 (95%)','Trolva 04 (72%)'],datasets:[{data:[68,44,95,72],backgroundColor:['#ddeafc','#fdd0d0','#d4f0e0','#fde8c0'],borderColor:['#2a6acc','#cc2020','#1a8a40','#a06010'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#6a85a0',font:{size:10},padding:8}}}}});
+  ['line','bar','dona'].forEach(k=>{if(charts[k]){charts[k].destroy();charts[k]=null;}});
+  const m=MC[curMet],data=CD[curCTrolva][curMet];
+  charts.line=new Chart($('cLine').getContext('2d'),{type:'line',data:{labels:CL,datasets:[{label:m.lbl,data,borderColor:m.col,backgroundColor:m.col+'18',borderWidth:2.5,pointRadius:3,pointBackgroundColor:m.col,tension:.4,fill:true}]},options:gOpt});
+  charts.bar=new Chart($('cBar').getContext('2d'),{type:'bar',data:{labels:['Trolva 01','Trolva 02','Trolva 03','Trolva 04'],datasets:[{data:[3.40,2.10,5.00,3.80],backgroundColor:['#d8eafc','#fdd0d0','#d0f0e0','#fde8b0'],borderColor:['#2a7acc','#cc2020','#1a8040','#c07010'],borderWidth:2,borderRadius:6}]},options:gOpt});
+  charts.dona=new Chart($('cDona').getContext('2d'),{type:'doughnut',data:{labels:['Trolva 01 (68%)','Trolva 02 (44%)','Trolva 03 (95%)','Trolva 04 (72%)'],datasets:[{data:[68,44,95,72],backgroundColor:['#d8eafc','#fdd0d0','#d0f0e0','#fde8b0'],borderColor:['#2a7acc','#cc2020','#1a8040','#c07010'],borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#5a7a9a',font:{size:10},padding:8}}}}});
   updStats();
 }
-
-function swChart(el){
-  document.querySelectorAll('#tCharts .pill[data-m]').forEach(p=>p.classList.remove('active')); el.classList.add('active'); curMetric=el.dataset.m;
-  $('cTit').textContent=MC[curMetric].lbl.split('(')[0].trim()+' — '+PD[curChartPipe].name.split('—')[0].trim();
-  if(chartM){const m=MC[curMetric],data=CD[curChartPipe][curMetric]; chartM.data.datasets[0].data=data; chartM.data.datasets[0].borderColor=m.col; chartM.data.datasets[0].backgroundColor=m.col+'18'; chartM.data.datasets[0].pointBackgroundColor=m.col; chartM.update();}
+function swMet(el){
+  document.querySelectorAll('#mpills .pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');
+  curMet=el.dataset.m;
+  if(charts.line){
+    const m=MC[curMet],data=CD[curCTrolva][curMet];
+    charts.line.data.datasets[0].data=data;charts.line.data.datasets[0].borderColor=m.col;
+    charts.line.data.datasets[0].backgroundColor=m.col+'18';charts.line.data.datasets[0].pointBackgroundColor=m.col;
+    charts.line.update();
+  }
+  $('cTit').textContent=MC[curMet].lbl.split('(')[0].trim()+' — '+TD[curCTrolva].nom.split('—')[0].trim();
   updStats();
 }
-
-function swChartPipe(el){
-  document.querySelectorAll('#tCharts .pill[data-cp]').forEach(p=>p.classList.remove('active')); el.classList.add('active'); curChartPipe=el.dataset.cp;
-  $('cTit').textContent=MC[curMetric].lbl.split('(')[0].trim()+' — '+PD[curChartPipe].name.split('—')[0].trim();
-  if(chartM){chartM.data.datasets[0].data=CD[curChartPipe][curMetric]; chartM.update();}
+function swTrolvaChart(el){
+  document.querySelectorAll('#cpills .pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');
+  curCTrolva=el.dataset.cp;
+  if(charts.line){charts.line.data.datasets[0].data=CD[curCTrolva][curMet];charts.line.update();}
+  $('cTit').textContent=MC[curMet].lbl.split('(')[0].trim()+' — '+TD[curCTrolva].nom.split('—')[0].trim();
   updStats();
 }
-
 function updStats(){
-  const vals=CD[curChartPipe][curMetric], u=MC[curMetric].u;
+  const vals=CD[curCTrolva][curMet],u=MC[curMet].u;
   const avg=(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
   $('sAvg').innerHTML=avg+' <span>'+u+'</span>';
   $('sMin').innerHTML=Math.min(...vals).toFixed(2)+' <span>'+u+'</span>';
   $('sMax').innerHTML=Math.max(...vals).toFixed(2)+' <span>'+u+'</span>';
 }
 
-// ── LIVE ──
+// ══ LIVE ══
 function startLive(){
   if(liveIv)clearInterval(liveIv);
   liveIv=setInterval(()=>{
     [['mFl',0.04],['mPr',0.02],['mDe',0.008],['mVe',0.015]].forEach(([id,sc])=>{
-      const el=$(id); if(!el)return;
+      const el=$(id);if(!el)return;
       el.textContent=Math.max(0,parseFloat(el.textContent)+(Math.random()-.5)*sc).toFixed(2);
     });
   },2500);
 }
 
-// ── OTP ──
+// ══ OTP ══
 document.querySelectorAll('.oi').forEach((inp,i,arr)=>{
-  inp.addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v.slice(-1);if(v&&i<arr.length-1)arr[i+1].focus();});
+  inp.addEventListener('input',e=>{
+    const v=e.target.value.replace(/\D/g,'');e.target.value=v.slice(-1);
+    if(v&&i<arr.length-1)arr[i+1].focus();
+  });
   inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!e.target.value&&i>0)arr[i-1].focus();});
 });
 
-// ── CLOCK ──
-const n=new Date(); $('clk').textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+// ══ CLOCK ══
+const n=new Date();$('clk').textContent=n.getHours()+':'+String(n.getMinutes()).padStart(2,'0');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
